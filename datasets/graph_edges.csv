@@ -1,0 +1,23 @@
+source,target,distance_km,road_name
+HUB,C1,4.8,Central Ave North
+HUB,C2,6.2,Civic Expressway
+HUB,C3,5.5,Hospital Arterial
+HUB,C6,5.3,Campus Link Rd
+HUB,C8,8.8,East Ring Corridor
+C1,C2,4.9,Midtown Connector
+C1,C8,6.7,Commerce Crossway
+C1,C9,4.2,Uptown Parkway
+C2,C3,4.7,West Civic Blvd
+C2,C9,7.8,North Ridge Ave
+C2,C10,4.6,Suburban Way
+C3,C4,5.1,Westside Arterial
+C3,C5,8.9,Riverfront Bypass
+C3,C10,5.7,Northwest Link
+C4,C5,5.4,Harbor Connector
+C5,C6,5.3,South Bay Rd
+C6,C7,5.8,Tech Valley Hwy
+C6,C8,9.5,Old Industrial Rd
+C7,C8,5.3,Innovation Drive
+C8,C9,6.0,Northeast Beltway
+C1,C6,9.4,Direct Meridian St
+C4,C6,9.1,Cross-Town Blvd

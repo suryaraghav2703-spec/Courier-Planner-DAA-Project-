@@ -1,0 +1,12 @@
+node_id,node_name,zone_type,x_km,y_km
+HUB,Central Dispatch Hub,Depot,10.0,10.0
+C1,Downtown Market,Commercial,12.5,14.0
+C2,Civic Center,Business,8.0,15.5
+C3,Medical District,Healthcare,5.0,12.0
+C4,Westside Mall,Retail,3.0,7.5
+C5,Waterfront Plaza,Commercial,6.5,3.5
+C6,University Campus,Academic,11.5,5.0
+C7,IT Corridor,Tech Park,17.0,6.5
+C8,Industrial Park,Industrial,18.5,11.5
+C9,Uptown Boulevard,Luxury Retail,15.5,16.5
+C10,Greenfield Suburb,Residential,4.0,17.5
