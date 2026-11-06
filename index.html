@@ -1,0 +1,465 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Mini-Courier Planner — Capstone Interactive Dashboard</title>
+  <style>
+    :root {
+      --bg: #0f172a;
+      --panel: #1e293b;
+      --panel-alt: #334155;
+      --text: #f8fafc;
+      --muted: #94a3b8;
+      --accent: #38bdf8;
+      --green: #10b981;
+      --amber: #f59e0b;
+      --purple: #a855f7;
+      --danger: #ef4444;
+      --border: rgba(148, 163, 184, 0.2);
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Inter, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      line-height: 1.6;
+      padding-bottom: 60px;
+    }
+    header {
+      background: linear-gradient(135deg, #0f172a 0%, #1e1b4b 50%, #0f172a 100%);
+      border-bottom: 1px solid var(--border);
+      padding: 32px 24px;
+      text-align: center;
+    }
+    .badge-row {
+      display: flex;
+      gap: 10px;
+      justify-content: center;
+      flex-wrap: wrap;
+      margin-bottom: 12px;
+    }
+    .badge {
+      background: rgba(56, 189, 248, 0.14);
+      border: 1px solid rgba(56, 189, 248, 0.4);
+      color: var(--accent);
+      font-size: 12px;
+      font-weight: 700;
+      padding: 4px 12px;
+      border-radius: 999px;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+    }
+    h1 {
+      font-size: 28px;
+      font-weight: 800;
+      margin-bottom: 8px;
+      color: #ffffff;
+    }
+    header p {
+      color: var(--muted);
+      max-width: 820px;
+      margin: 0 auto;
+      font-size: 15px;
+    }
+    .container {
+      max-width: 1320px;
+      margin: 0 auto;
+      padding: 24px;
+    }
+    .kpi-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+      gap: 16px;
+      margin-bottom: 28px;
+    }
+    .kpi-card {
+      background: var(--panel);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 18px 20px;
+    }
+    .kpi-label {
+      color: var(--muted);
+      font-size: 12px;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+    }
+    .kpi-val {
+      font-size: 26px;
+      font-weight: 800;
+      margin: 6px 0 4px;
+      color: var(--accent);
+    }
+    .kpi-sub {
+      font-size: 12.5px;
+      color: #cbd5e1;
+    }
+    .section {
+      background: var(--panel);
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      padding: 24px;
+      margin-bottom: 28px;
+    }
+    .section-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 12px;
+      border-bottom: 1px solid var(--border);
+      padding-bottom: 14px;
+      margin-bottom: 20px;
+    }
+    .section-title {
+      font-size: 19px;
+      font-weight: 700;
+      color: #fff;
+    }
+    .phase-pill {
+      background: #0284c7;
+      color: #fff;
+      font-size: 12px;
+      font-weight: 700;
+      padding: 4px 12px;
+      border-radius: 6px;
+    }
+    .controls-bar {
+      display: flex;
+      align-items: center;
+      gap: 20px;
+      flex-wrap: wrap;
+      background: rgba(15, 23, 42, 0.65);
+      border: 1px solid var(--border);
+      padding: 16px 20px;
+      border-radius: 10px;
+      margin-bottom: 20px;
+    }
+    .controls-bar label {
+      font-weight: 600;
+      font-size: 14px;
+    }
+    input[type="range"] {
+      width: 240px;
+      accent-color: var(--accent);
+      cursor: pointer;
+    }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 13.5px;
+    }
+    th, td {
+      padding: 10px 12px;
+      text-align: left;
+      border-bottom: 1px solid var(--border);
+    }
+    th {
+      background: rgba(15, 23, 42, 0.7);
+      color: var(--accent);
+      font-weight: 700;
+      font-size: 12px;
+      text-transform: uppercase;
+    }
+    tr.packed-row {
+      background: rgba(16, 185, 129, 0.12);
+    }
+    .status-pill {
+      display: inline-block;
+      padding: 2px 9px;
+      border-radius: 999px;
+      font-size: 11px;
+      font-weight: 700;
+    }
+    .status-packed {
+      background: rgba(16, 185, 129, 0.2);
+      color: #34d399;
+      border: 1px solid rgba(16, 185, 129, 0.4);
+    }
+    .status-deferred {
+      background: rgba(148, 163, 184, 0.15);
+      color: #94a3b8;
+    }
+    .tier-1 { color: #f87171; font-weight: 700; }
+    .tier-2 { color: #fbbf24; font-weight: 600; }
+    .tier-3 { color: #94a3b8; }
+    .img-frame {
+      width: 100%;
+      border-radius: 10px;
+      border: 1px solid var(--border);
+      margin-top: 12px;
+      background: #fff;
+    }
+    .img-dark {
+      background: #0f172a;
+    }
+    .route-box {
+      background: rgba(15, 23, 42, 0.8);
+      border-left: 4px solid var(--green);
+      padding: 14px 18px;
+      border-radius: 8px;
+      font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+      font-size: 13.5px;
+      margin-bottom: 16px;
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <div class="badge-row">
+      <span class="badge">Capstone Project (100 Marks)</span>
+      <span class="badge">CO1 – CO5 (L5 Evaluate)</span>
+      <span class="badge">Tag: v1.0-final-submission</span>
+    </div>
+    <h1>Mini-Courier Planner — Intelligent Dispatch & Route Optimizer</h1>
+    <p>Integrated Python & Interactive Prototype Combining Merge Sort Prioritization, 0/1 Knapsack Dynamic Programming, Dijkstra Shortest Paths, and Nearest-Neighbor / 2-Opt TSP Approximation</p>
+  </header>
+
+  <div class="container">
+    <!-- Top KPI Summary -->
+    <div class="kpi-grid">
+      <div class="kpi-card">
+        <div class="kpi-label">Phase 2A: Sorting Algorithm</div>
+        <div class="kpi-val" id="kpi-sort">Merge Sort</div>
+        <div class="kpi-sub">O(n log n) Stable | 41 comparisons (0.02 ms)</div>
+      </div>
+      <div class="kpi-card">
+        <div class="kpi-label">Phase 2B: 0/1 Knapsack DP Value</div>
+        <div class="kpi-val" id="kpi-dp-val" style="color: var(--green);">785 pts</div>
+        <div class="kpi-sub" id="kpi-dp-sub">30 / 30 kg (100.0% Util) | +55 pts vs Greedy</div>
+      </div>
+      <div class="kpi-card">
+        <div class="kpi-label">Phase 3: Nearest-Neighbor TSP</div>
+        <div class="kpi-val" id="kpi-route-dist" style="color: var(--amber);">52.60 km</div>
+        <div class="kpi-sub" id="kpi-route-sub">2-Opt / Exact Optimal: 51.20 km (-1.40 km)</div>
+      </div>
+      <div class="kpi-card">
+        <div class="kpi-label">Phase 4: 500-Parcel Scalability</div>
+        <div class="kpi-val" style="color: var(--purple);">5.98 ms</div>
+        <div class="kpi-sub">Small (N=20): 0.17 ms | Medium (N=100): 0.81 ms</div>
+      </div>
+    </div>
+
+    <!-- Interactive Simulator Section -->
+    <div class="section">
+      <div class="section-header">
+        <div class="section-title">Interactive Courier Van Simulator (Live 0/1 Knapsack DP + Dijkstra + Nearest-Neighbor TSP)</div>
+        <span class="phase-pill">LIVE SIMULATOR</span>
+      </div>
+      <div class="controls-bar">
+        <label for="cap-slider">Courier Van Capacity (W): <span id="cap-display" style="color: var(--accent); font-weight: 800;">30 kg</span></label>
+        <input type="range" id="cap-slider" min="10" max="65" value="30" step="1" />
+        <span id="sim-summary" style="font-size: 13.5px; color: #cbd5e1;"></span>
+      </div>
+
+      <div class="route-box" id="live-route-box"></div>
+
+      <div style="overflow-x: auto;">
+        <table>
+          <thead>
+            <tr>
+              <th>Merge Sort Rank</th>
+              <th>Parcel ID</th>
+              <th>Customer</th>
+              <th>Destination Zone</th>
+              <th>Priority Tier</th>
+              <th>SLA Deadline</th>
+              <th>Weight</th>
+              <th>Value Score</th>
+              <th>Density (v/w)</th>
+              <th>0/1 Knapsack DP Decision</th>
+            </tr>
+          </thead>
+          <tbody id="parcel-tbody"></tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- Phase 1 Visual -->
+    <div class="section">
+      <div class="section-header">
+        <div class="section-title">Phase 1: Courier Problem Design & System Architecture (20 Marks)</div>
+        <span class="phase-pill">PHASE 1</span>
+      </div>
+      <img src="images/phase1_system_architecture.png" alt="Phase 1 Architecture" class="img-frame" />
+    </div>
+
+    <!-- Phase 2 Visual -->
+    <div class="section">
+      <div class="section-header">
+        <div class="section-title">Phase 2: Package Prioritization (Merge Sort) & 0/1 Knapsack DP State Table (20 Marks)</div>
+        <span class="phase-pill">PHASE 2</span>
+      </div>
+      <img src="images/phase2_knapsack_and_prioritization.png" alt="Phase 2 Knapsack DP" class="img-frame" />
+    </div>
+
+    <!-- Phase 3 Visual -->
+    <div class="section">
+      <div class="section-header">
+        <div class="section-title">Phase 3: Customer Road Graph, Dijkstra Shortest-Path Matrix & Nearest-Neighbor TSP Route (20 Marks)</div>
+        <span class="phase-pill">PHASE 3</span>
+      </div>
+      <img src="images/phase3_delivery_route_map.png" alt="Phase 3 Route Map" class="img-frame" />
+    </div>
+
+    <!-- Phase 4 Visual -->
+    <div class="section">
+      <div class="section-header">
+        <div class="section-title">Phase 4: Performance Testing, Complexity Scaling & Dataset Comparison (20 Marks)</div>
+        <span class="phase-pill">PHASE 4</span>
+      </div>
+      <img src="images/phase4_runtime_scalability_charts.png" alt="Phase 4 Scalability Charts" class="img-frame" />
+    </div>
+
+    <!-- Phase 5 Visual -->
+    <div class="section">
+      <div class="section-header">
+        <div class="section-title">Phase 5: Final Execution Trace & Demonstration Output (20 Marks)</div>
+        <span class="phase-pill">PHASE 5</span>
+      </div>
+      <img src="images/phase5_console_execution_screenshot.png" alt="Phase 5 Console Trace" class="img-frame img-dark" />
+    </div>
+  </div>
+
+  <script>
+    // Merge-sorted sample manifest from Phase 2A
+    const SORTED_PARCELS = [
+      { id: "P013", customer: "City General Hospital", dest: "C3", zone: "Medical District", tier: 1, deadline: 1.0, weight: 6, value: 140 },
+      { id: "P004", customer: "Metro Legal Associates", dest: "C2", zone: "Civic Center", tier: 1, deadline: 1.5, weight: 2, value: 85 },
+      { id: "P001", customer: "Apollo Diagnostics", dest: "C3", zone: "Medical District", tier: 1, deadline: 2.0, weight: 4, value: 95 },
+      { id: "P008", customer: "Apex Financial Corp", dest: "C2", zone: "Civic Center", tier: 1, deadline: 2.0, weight: 3, value: 90 },
+      { id: "P005", customer: "Harbor View Pharmacy", dest: "C5", zone: "Waterfront Plaza", tier: 1, deadline: 2.5, weight: 3, value: 80 },
+      { id: "P014", customer: "SilverOak Jewelers", dest: "C9", zone: "Uptown Boulevard", tier: 1, deadline: 3.0, weight: 2, value: 105 },
+      { id: "P002", customer: "TechNova Labs", dest: "C7", zone: "IT Corridor", tier: 1, deadline: 3.5, weight: 6, value: 114 },
+      { id: "P010", customer: "Bayfront Cold Storage", dest: "C5", zone: "Waterfront Plaza", tier: 2, deadline: 4.0, weight: 7, value: 135 },
+      { id: "P009", customer: "Quantum Robotics", dest: "C7", zone: "IT Corridor", tier: 2, deadline: 4.5, weight: 8, value: 115 },
+      { id: "P003", customer: "GreenLeaf Grocers", dest: "C1", zone: "Downtown Market", tier: 2, deadline: 5.0, weight: 4, value: 76 },
+      { id: "P006", customer: "BlueWave Electronics", dest: "C8", zone: "Industrial Park", tier: 2, deadline: 6.0, weight: 9, value: 110 },
+      { id: "P012", customer: "Scholars Bookstore", dest: "C6", zone: "University Campus", tier: 3, deadline: 8.0, weight: 5, value: 60 },
+      { id: "P007", customer: "Urban Threads Apparel", dest: "C4", zone: "Westside Mall", tier: 3, deadline: 10.0, weight: 6, value: 55 },
+      { id: "P011", customer: "Prime Auto Parts", dest: "C8", zone: "Industrial Park", tier: 3, deadline: 12.0, weight: 11, value: 85 },
+      { id: "P015", customer: "EcoHome Appliances", dest: "C10", zone: "Greenfield Suburb", tier: 3, deadline: 14.0, weight: 10, value: 75 }
+    ];
+
+    // All-Pairs Dijkstra shortest-path distance matrix (km) across city graph
+    const DIST_MATRIX = {
+      HUB: { HUB: 0, C1: 4.8, C2: 6.2, C3: 5.5, C4: 10.6, C5: 10.6, C6: 5.3, C7: 11.1, C8: 8.8, C9: 9.0, C10: 10.8 },
+      C1:  { HUB: 4.8, C1: 0, C2: 4.9, C3: 9.6, C4: 14.7, C5: 14.7, C6: 9.4, C7: 12.0, C8: 6.7, C9: 4.2, C10: 9.5 },
+      C2:  { HUB: 6.2, C1: 4.9, C2: 0, C3: 4.7, C4: 9.8, C5: 13.6, C6: 11.5, C7: 16.9, C8: 11.6, C9: 7.8, C10: 4.6 },
+      C3:  { HUB: 5.5, C1: 9.6, C2: 4.7, C3: 0, C4: 5.1, C5: 8.9, C6: 10.8, C7: 16.6, C8: 14.3, C9: 12.5, C10: 5.7 },
+      C4:  { HUB: 10.6, C1: 14.7, C2: 9.8, C3: 5.1, C4: 0, C5: 5.4, C6: 9.1, C7: 14.9, C8: 18.6, C9: 17.6, C10: 10.8 },
+      C5:  { HUB: 10.6, C1: 14.7, C2: 13.6, C3: 8.9, C4: 5.4, C5: 0, C6: 5.3, C7: 11.1, C8: 14.8, C9: 18.9, C10: 14.6 },
+      C6:  { HUB: 5.3, C1: 9.4, C2: 11.5, C3: 10.8, C4: 9.1, C5: 5.3, C6: 0, C7: 5.8, C8: 9.5, C9: 13.6, C10: 16.1 },
+      C7:  { HUB: 11.1, C1: 12.0, C2: 16.9, C3: 16.6, C4: 14.9, C5: 11.1, C6: 5.8, C7: 0, C8: 5.3, C9: 11.3, C10: 21.5 },
+      C8:  { HUB: 8.8, C1: 6.7, C2: 11.6, C3: 14.3, C4: 18.6, C5: 14.8, C6: 9.5, C7: 5.3, C8: 0, C9: 6.0, C10: 16.2 },
+      C9:  { HUB: 9.0, C1: 4.2, C2: 7.8, C3: 12.5, C4: 17.6, C5: 18.9, C6: 13.6, C7: 11.3, C8: 6.0, C9: 0, C10: 12.4 },
+      C10: { HUB: 10.8, C1: 9.5, C2: 4.6, C3: 5.7, C4: 10.8, C5: 14.6, C6: 16.1, C7: 21.5, C8: 16.2, C9: 12.4, C10: 0 }
+    };
+
+    function solveKnapsackDP(capacity) {
+      const n = SORTED_PARCELS.length;
+      const dp = Array.from({ length: n + 1 }, () => new Array(capacity + 1).fill(0));
+      for (let i = 1; i <= n; i++) {
+        const wt = SORTED_PARCELS[i - 1].weight;
+        const val = SORTED_PARCELS[i - 1].value;
+        for (let w = 0; w <= capacity; w++) {
+          if (wt <= w) {
+            dp[i][w] = Math.max(dp[i - 1][w], val + dp[i - 1][w - wt]);
+          } else {
+            dp[i][w] = dp[i - 1][w];
+          }
+        }
+      }
+      const selectedSet = new Set();
+      let remW = capacity;
+      for (let i = n; i >= 1; i--) {
+        if (dp[i][remW] !== dp[i - 1][remW]) {
+          selectedSet.add(SORTED_PARCELS[i - 1].id);
+          remW -= SORTED_PARCELS[i - 1].weight;
+        }
+      }
+      return { maxVal: dp[n][capacity], packedWeight: capacity - remW, selectedSet };
+    }
+
+    function solveNearestNeighborTSP(selectedSet) {
+      const stops = [];
+      const seen = new Set(["HUB"]);
+      for (const p of SORTED_PARCELS) {
+        if (selectedSet.has(p.id) && !seen.has(p.dest)) {
+          seen.add(p.dest);
+          stops.push(p.dest);
+        }
+      }
+      const unvisited = new Set(stops);
+      let curr = "HUB";
+      const tour = ["HUB"];
+      let totalDist = 0;
+      while (unvisited.size > 0) {
+        let bestNext = null;
+        let bestDist = Infinity;
+        for (const cand of Array.from(unvisited).sort()) {
+          const d = DIST_MATRIX[curr][cand];
+          if (d < bestDist) {
+            bestDist = d;
+            bestNext = cand;
+          }
+        }
+        tour.push(bestNext);
+        totalDist += bestDist;
+        unvisited.delete(bestNext);
+        curr = bestNext;
+      }
+      totalDist += DIST_MATRIX[curr]["HUB"];
+      tour.push("HUB");
+      return { tour, totalDist };
+    }
+
+    function updateSimulator() {
+      const cap = parseInt(document.getElementById("cap-slider").value, 10);
+      document.getElementById("cap-display").textContent = `${cap} kg`;
+
+      const { maxVal, packedWeight, selectedSet } = solveKnapsackDP(cap);
+      const { tour, totalDist } = solveNearestNeighborTSP(selectedSet);
+      const util = ((packedWeight / cap) * 100).toFixed(1);
+
+      document.getElementById("kpi-dp-val").textContent = `${maxVal} pts`;
+      document.getElementById("kpi-dp-sub").textContent = `${packedWeight} / ${cap} kg (${util}% Util) | ${selectedSet.size} Parcels Packed`;
+      document.getElementById("kpi-route-dist").textContent = `${totalDist.toFixed(2)} km`;
+
+      document.getElementById("sim-summary").innerHTML =
+        `<strong>0/1 DP Optimal Value:</strong> ${maxVal} pts &nbsp;|&nbsp; <strong>Packed Weight:</strong> ${packedWeight}/${cap} kg (${util}%) &nbsp;|&nbsp; <strong>Selected Parcels:</strong> ${selectedSet.size}/15`;
+
+      document.getElementById("live-route-box").innerHTML =
+        `<strong>Active Nearest-Neighbor TSP Delivery Route (${tour.length - 2} Stops, Total = ${totalDist.toFixed(2)} km):</strong><br/>` +
+        tour.join(" &rarr; ");
+
+      const tbody = document.getElementById("parcel-tbody");
+      tbody.innerHTML = "";
+      SORTED_PARCELS.forEach((p, idx) => {
+        const isPacked = selectedSet.has(p.id);
+        const tierLabel = p.tier === 1 ? "CRITICAL (T1)" : p.tier === 2 ? "STANDARD (T2)" : "ECONOMY (T3)";
+        const tr = document.createElement("tr");
+        if (isPacked) tr.className = "packed-row";
+        tr.innerHTML = `
+          <td><strong>#${idx + 1}</strong></td>
+          <td><code>${p.id}</code></td>
+          <td>${p.customer}</td>
+          <td><strong>${p.dest}</strong> (${p.zone})</td>
+          <td class="tier-${p.tier}">${tierLabel}</td>
+          <td>${p.deadline.toFixed(1)} hrs</td>
+          <td>${p.weight} kg</td>
+          <td><strong>${p.value}</strong></td>
+          <td>${(p.value / p.weight).toFixed(2)}</td>
+          <td><span class="status-pill ${isPacked ? 'status-packed' : 'status-deferred'}">${isPacked ? 'PACKED IN VAN' : 'DEFERRED'}</span></td>
+        `;
+        tbody.appendChild(tr);
+      });
+    }
+
+    document.getElementById("cap-slider").addEventListener("input", updateSimulator);
+    updateSimulator();
+  </script>
+</body>
+</html>
