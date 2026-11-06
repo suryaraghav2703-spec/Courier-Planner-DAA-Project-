@@ -3,328 +3,1937 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Mini-Courier Planner — Capstone Interactive Dashboard</title>
+  <title>Mini-Courier Planner — Algorithmic Dispatch & Route Optimization Dashboard</title>
   <style>
     :root {
-      --bg: #0f172a;
-      --panel: #1e293b;
-      --panel-alt: #334155;
-      --text: #f8fafc;
-      --muted: #94a3b8;
-      --accent: #38bdf8;
-      --green: #10b981;
-      --amber: #f59e0b;
-      --purple: #a855f7;
-      --danger: #ef4444;
-      --border: rgba(148, 163, 184, 0.2);
+      --bg: #090d16;
+      --bg-surface: #0f172a;
+      --bg-card: #141e33;
+      --bg-card-hover: #1a2744;
+      --bg-elevated: #1e293b;
+      --border: rgba(148, 163, 184, 0.15);
+      --border-accent: rgba(56, 189, 248, 0.35);
+      --border-glow: rgba(56, 189, 248, 0.5);
+      --text-main: #f8fafc;
+      --text-secondary: #94a3b8;
+      --text-muted: #64748b;
+      --accent-cyan: #38bdf8;
+      --accent-blue: #0284c7;
+      --accent-emerald: #10b981;
+      --accent-emerald-glow: rgba(16, 185, 129, 0.25);
+      --accent-amber: #f59e0b;
+      --accent-rose: #f43f5e;
+      --accent-purple: #a855f7;
+      --accent-indigo: #6366f1;
+      --radius-sm: 6px;
+      --radius-md: 10px;
+      --radius-lg: 16px;
+      --radius-xl: 20px;
+      --shadow-card: 0 10px 30px -10px rgba(0, 0, 0, 0.6);
+      --shadow-glow: 0 0 25px rgba(56, 189, 248, 0.15);
+      --font-mono: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
     }
+
     * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    html {
+      scroll-behavior: smooth;
+    }
+
     body {
-      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Inter, sans-serif;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Inter", "Helvetica Neue", sans-serif;
       background: var(--bg);
-      color: var(--text);
+      background-image: 
+        radial-gradient(circle at 15% 10%, rgba(56, 189, 248, 0.08) 0%, transparent 40%),
+        radial-gradient(circle at 85% 30%, rgba(168, 85, 247, 0.06) 0%, transparent 45%),
+        radial-gradient(circle at 50% 80%, rgba(16, 185, 129, 0.05) 0%, transparent 50%),
+        linear-gradient(rgba(148, 163, 184, 0.03) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(148, 163, 184, 0.03) 1px, transparent 1px);
+      background-size: 100% 100%, 100% 100%, 100% 100%, 48px 48px, 48px 48px;
+      color: var(--text-main);
       line-height: 1.6;
-      padding-bottom: 60px;
+      padding-bottom: 80px;
+      -webkit-font-smoothing: antialiased;
     }
-    header {
-      background: linear-gradient(135deg, #0f172a 0%, #1e1b4b 50%, #0f172a 100%);
+
+    /* Top Navigation Bar */
+    .navbar {
+      position: sticky;
+      top: 0;
+      z-index: 100;
+      backdrop-filter: blur(16px);
+      -webkit-backdrop-filter: blur(16px);
+      background: rgba(9, 13, 22, 0.85);
       border-bottom: 1px solid var(--border);
-      padding: 32px 24px;
-      text-align: center;
-    }
-    .badge-row {
+      padding: 12px 24px;
       display: flex;
-      gap: 10px;
-      justify-content: center;
-      flex-wrap: wrap;
-      margin-bottom: 12px;
+      align-items: center;
+      justify-content: space-between;
+      gap: 16px;
     }
-    .badge {
-      background: rgba(56, 189, 248, 0.14);
-      border: 1px solid rgba(56, 189, 248, 0.4);
-      color: var(--accent);
-      font-size: 12px;
+    .nav-brand {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      text-decoration: none;
+      color: inherit;
+    }
+    .brand-logo {
+      width: 36px;
+      height: 36px;
+      border-radius: 9px;
+      background: linear-gradient(135deg, #0284c7, #10b981);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: #fff;
+      font-weight: 800;
+      font-size: 18px;
+      box-shadow: 0 0 15px rgba(56, 189, 248, 0.4);
+    }
+    .brand-info h2 {
+      font-size: 16px;
+      font-weight: 800;
+      letter-spacing: -0.02em;
+      color: #fff;
+      line-height: 1.2;
+    }
+    .brand-info span {
+      font-size: 11px;
+      color: var(--text-secondary);
+      font-family: var(--font-mono);
+    }
+    .nav-links {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      list-style: none;
+      overflow-x: auto;
+      padding-bottom: 2px;
+    }
+    .nav-link {
+      color: var(--text-secondary);
+      text-decoration: none;
+      font-size: 13px;
+      font-weight: 600;
+      padding: 6px 12px;
+      border-radius: var(--radius-sm);
+      transition: all 0.2s ease;
+      white-space: nowrap;
+    }
+    .nav-link:hover, .nav-link.active {
+      color: #fff;
+      background: rgba(255, 255, 255, 0.08);
+    }
+    .nav-actions {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    .live-indicator {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      background: rgba(16, 185, 129, 0.12);
+      border: 1px solid rgba(16, 185, 129, 0.3);
+      color: #34d399;
+      font-size: 11px;
       font-weight: 700;
-      padding: 4px 12px;
+      padding: 4px 10px;
+      border-radius: 999px;
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+    }
+    .live-dot {
+      width: 7px;
+      height: 7px;
+      border-radius: 50%;
+      background: #10b981;
+      box-shadow: 0 0 8px #10b981;
+      animation: pulse-glow 2s infinite;
+    }
+    @keyframes pulse-glow {
+      0%, 100% { opacity: 1; transform: scale(1); }
+      50% { opacity: 0.4; transform: scale(0.85); }
+    }
+
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 7px;
+      font-size: 13px;
+      font-weight: 600;
+      padding: 7px 14px;
+      border-radius: var(--radius-sm);
+      cursor: pointer;
+      transition: all 0.2s ease;
+      border: 1px solid transparent;
+      outline: none;
+      white-space: nowrap;
+    }
+    .btn-primary {
+      background: linear-gradient(135deg, #0284c7, #0369a1);
+      color: #fff;
+      border-color: rgba(56, 189, 248, 0.4);
+      box-shadow: 0 2px 8px rgba(2, 132, 199, 0.35);
+    }
+    .btn-primary:hover {
+      background: linear-gradient(135deg, #0369a1, #0284c7);
+      border-color: var(--accent-cyan);
+      box-shadow: 0 0 15px rgba(56, 189, 248, 0.5);
+    }
+    .btn-outline {
+      background: rgba(30, 41, 59, 0.6);
+      border-color: var(--border);
+      color: var(--text-main);
+    }
+    .btn-outline:hover {
+      background: rgba(51, 65, 85, 0.8);
+      border-color: var(--accent-cyan);
+      color: #fff;
+    }
+    .btn-emerald {
+      background: rgba(16, 185, 129, 0.15);
+      border-color: rgba(16, 185, 129, 0.4);
+      color: #34d399;
+    }
+    .btn-emerald:hover {
+      background: rgba(16, 185, 129, 0.25);
+      border-color: #10b981;
+    }
+
+    /* Container */
+    .container {
+      max-width: 1380px;
+      margin: 0 auto;
+      padding: 24px 20px;
+    }
+
+    /* Hero Banner */
+    .hero-banner {
+      background: linear-gradient(135deg, rgba(15, 23, 42, 0.95) 0%, rgba(30, 27, 75, 0.4) 50%, rgba(15, 23, 42, 0.95) 100%);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-lg);
+      padding: 32px 28px;
+      margin-bottom: 28px;
+      position: relative;
+      overflow: hidden;
+      box-shadow: var(--shadow-card);
+    }
+    .hero-banner::after {
+      content: "";
+      position: absolute;
+      top: -50%;
+      right: -20%;
+      width: 450px;
+      height: 450px;
+      border-radius: 50%;
+      background: radial-gradient(circle, rgba(56, 189, 248, 0.08) 0%, transparent 70%);
+      pointer-events: none;
+    }
+    .hero-tags {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin-bottom: 14px;
+    }
+    .tag {
+      background: rgba(56, 189, 248, 0.1);
+      border: 1px solid rgba(56, 189, 248, 0.3);
+      color: var(--accent-cyan);
+      font-size: 11px;
+      font-weight: 700;
+      padding: 3px 10px;
       border-radius: 999px;
       text-transform: uppercase;
       letter-spacing: 0.05em;
     }
-    h1 {
-      font-size: 28px;
+    .tag-purple {
+      background: rgba(168, 85, 247, 0.1);
+      border-color: rgba(168, 85, 247, 0.35);
+      color: var(--accent-purple);
+    }
+    .tag-emerald {
+      background: rgba(16, 185, 129, 0.1);
+      border-color: rgba(16, 185, 129, 0.35);
+      color: #34d399;
+    }
+    .hero-title {
+      font-size: 32px;
       font-weight: 800;
-      margin-bottom: 8px;
       color: #ffffff;
+      line-height: 1.25;
+      margin-bottom: 12px;
+      letter-spacing: -0.02em;
     }
-    header p {
-      color: var(--muted);
-      max-width: 820px;
-      margin: 0 auto;
+    .hero-title span {
+      background: linear-gradient(135deg, #38bdf8 0%, #a855f7 50%, #10b981 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+    .hero-desc {
+      color: var(--text-secondary);
       font-size: 15px;
+      max-width: 980px;
+      line-height: 1.6;
     }
-    .container {
-      max-width: 1320px;
-      margin: 0 auto;
-      padding: 24px;
-    }
+
+    /* KPI Summary Grid */
     .kpi-grid {
       display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+      grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
       gap: 16px;
       margin-bottom: 28px;
     }
     .kpi-card {
-      background: var(--panel);
+      background: var(--bg-card);
       border: 1px solid var(--border);
-      border-radius: 12px;
-      padding: 18px 20px;
+      border-radius: var(--radius-md);
+      padding: 20px 22px;
+      position: relative;
+      overflow: hidden;
+      transition: all 0.25s ease;
+      box-shadow: var(--shadow-card);
+    }
+    .kpi-card:hover {
+      border-color: var(--border-accent);
+      transform: translateY(-2px);
+      box-shadow: var(--shadow-glow);
+    }
+    .kpi-card::before {
+      content: "";
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 3px;
+      background: linear-gradient(90deg, transparent, var(--card-accent, var(--accent-cyan)), transparent);
+    }
+    .kpi-card.cyan { --card-accent: var(--accent-cyan); }
+    .kpi-card.green { --card-accent: var(--accent-emerald); }
+    .kpi-card.amber { --card-accent: var(--accent-amber); }
+    .kpi-card.purple { --card-accent: var(--accent-purple); }
+    .kpi-card.rose { --card-accent: var(--accent-rose); }
+
+    .kpi-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 8px;
     }
     .kpi-label {
-      color: var(--muted);
+      color: var(--text-secondary);
       font-size: 12px;
-      font-weight: 600;
+      font-weight: 700;
       text-transform: uppercase;
       letter-spacing: 0.05em;
     }
-    .kpi-val {
-      font-size: 26px;
+    .kpi-badge {
+      font-size: 10px;
       font-weight: 800;
-      margin: 6px 0 4px;
-      color: var(--accent);
+      padding: 2px 7px;
+      border-radius: 4px;
+      font-family: var(--font-mono);
+    }
+    .kpi-val {
+      font-size: 28px;
+      font-weight: 800;
+      letter-spacing: -0.02em;
+      margin-bottom: 6px;
+      color: #fff;
+      display: flex;
+      align-items: baseline;
+      gap: 6px;
     }
     .kpi-sub {
+      color: var(--text-secondary);
       font-size: 12.5px;
-      color: #cbd5e1;
+      line-height: 1.4;
     }
-    .section {
-      background: var(--panel);
+    .kpi-sub strong {
+      color: #fff;
+    }
+
+    /* Section Styles */
+    .section-panel {
+      background: var(--bg-card);
       border: 1px solid var(--border);
-      border-radius: 14px;
-      padding: 24px;
+      border-radius: var(--radius-lg);
+      padding: 26px;
       margin-bottom: 28px;
+      box-shadow: var(--shadow-card);
     }
     .section-header {
       display: flex;
-      justify-content: space-between;
       align-items: center;
+      justify-content: space-between;
       flex-wrap: wrap;
-      gap: 12px;
+      gap: 14px;
+      padding-bottom: 16px;
       border-bottom: 1px solid var(--border);
-      padding-bottom: 14px;
-      margin-bottom: 20px;
+      margin-bottom: 22px;
+    }
+    .section-title-wrap {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+    .section-icon {
+      width: 32px;
+      height: 32px;
+      border-radius: 8px;
+      background: rgba(56, 189, 248, 0.12);
+      border: 1px solid rgba(56, 189, 248, 0.3);
+      color: var(--accent-cyan);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 16px;
     }
     .section-title {
-      font-size: 19px;
-      font-weight: 700;
+      font-size: 20px;
+      font-weight: 800;
       color: #fff;
+      letter-spacing: -0.01em;
     }
-    .phase-pill {
-      background: #0284c7;
+    .section-subtitle {
+      font-size: 13px;
+      color: var(--text-secondary);
+      margin-top: 2px;
+    }
+    .phase-badge {
+      background: linear-gradient(135deg, #0284c7, #0369a1);
       color: #fff;
-      font-size: 12px;
+      font-size: 11.5px;
       font-weight: 700;
       padding: 4px 12px;
       border-radius: 6px;
+      letter-spacing: 0.04em;
     }
-    .controls-bar {
+
+    /* Interactive Controls Panel */
+    .controls-panel {
+      background: rgba(15, 23, 42, 0.7);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-md);
+      padding: 20px;
+      margin-bottom: 22px;
+      display: grid;
+      grid-template-columns: 1fr auto;
+      gap: 24px;
+      align-items: center;
+    }
+    @media (max-width: 900px) {
+      .controls-panel { grid-template-columns: 1fr; }
+    }
+    .slider-group {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+    .slider-header {
       display: flex;
       align-items: center;
-      gap: 20px;
+      justify-content: space-between;
       flex-wrap: wrap;
-      background: rgba(15, 23, 42, 0.65);
-      border: 1px solid var(--border);
-      padding: 16px 20px;
-      border-radius: 10px;
-      margin-bottom: 20px;
+      gap: 8px;
     }
-    .controls-bar label {
-      font-weight: 600;
+    .slider-label {
       font-size: 14px;
+      font-weight: 700;
+      color: #fff;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .slider-val-badge {
+      font-family: var(--font-mono);
+      font-size: 16px;
+      font-weight: 800;
+      color: var(--accent-cyan);
+      background: rgba(56, 189, 248, 0.12);
+      border: 1px solid rgba(56, 189, 248, 0.3);
+      padding: 3px 12px;
+      border-radius: 6px;
+    }
+    .range-input-wrap {
+      display: flex;
+      align-items: center;
+      gap: 16px;
     }
     input[type="range"] {
-      width: 240px;
-      accent-color: var(--accent);
+      -webkit-appearance: none;
+      width: 100%;
+      height: 8px;
+      border-radius: 4px;
+      background: #1e293b;
+      outline: none;
       cursor: pointer;
     }
-    table {
-      width: 100%;
-      border-collapse: collapse;
-      font-size: 13.5px;
+    input[type="range"]::-webkit-slider-thumb {
+      -webkit-appearance: none;
+      appearance: none;
+      width: 22px;
+      height: 22px;
+      border-radius: 50%;
+      background: var(--accent-cyan);
+      box-shadow: 0 0 10px rgba(56, 189, 248, 0.8);
+      cursor: pointer;
+      border: 2px solid #fff;
+      transition: transform 0.1s ease;
     }
-    th, td {
-      padding: 10px 12px;
-      text-align: left;
-      border-bottom: 1px solid var(--border);
+    input[type="range"]::-webkit-slider-thumb:hover {
+      transform: scale(1.15);
     }
-    th {
-      background: rgba(15, 23, 42, 0.7);
-      color: var(--accent);
-      font-weight: 700;
+    .preset-buttons {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+    }
+    .preset-btn {
+      background: rgba(30, 41, 59, 0.8);
+      border: 1px solid var(--border);
+      color: var(--text-secondary);
       font-size: 12px;
-      text-transform: uppercase;
+      font-weight: 600;
+      padding: 5px 12px;
+      border-radius: var(--radius-sm);
+      cursor: pointer;
+      transition: all 0.2s ease;
     }
-    tr.packed-row {
-      background: rgba(16, 185, 129, 0.12);
+    .preset-btn:hover, .preset-btn.active {
+      background: rgba(56, 189, 248, 0.15);
+      border-color: var(--accent-cyan);
+      color: #fff;
     }
-    .status-pill {
-      display: inline-block;
-      padding: 2px 9px;
-      border-radius: 999px;
-      font-size: 11px;
-      font-weight: 700;
+
+    .toggles-group {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
     }
-    .status-packed {
+    .toggle-row {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    .toggle-label {
+      font-size: 12px;
+      color: var(--text-secondary);
+      font-weight: 600;
+      min-width: 90px;
+    }
+    .segmented-control {
+      display: inline-flex;
+      background: #0f172a;
+      border: 1px solid var(--border);
+      border-radius: var(--radius-sm);
+      padding: 3px;
+      gap: 4px;
+    }
+    .seg-btn {
+      background: transparent;
+      border: none;
+      color: var(--text-muted);
+      font-size: 12px;
+      font-weight: 600;
+      padding: 5px 12px;
+      border-radius: 4px;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      white-space: nowrap;
+    }
+    .seg-btn.active {
+      background: #1e293b;
+      color: #fff;
+      box-shadow: 0 2px 4px rgba(0, 0, 0, 0.4);
+    }
+    .seg-btn.active.dp {
       background: rgba(16, 185, 129, 0.2);
       color: #34d399;
       border: 1px solid rgba(16, 185, 129, 0.4);
     }
-    .status-deferred {
-      background: rgba(148, 163, 184, 0.15);
-      color: #94a3b8;
+    .seg-btn.active.greedy {
+      background: rgba(245, 158, 11, 0.2);
+      color: #fbbf24;
+      border: 1px solid rgba(245, 158, 11, 0.4);
     }
-    .tier-1 { color: #f87171; font-weight: 700; }
-    .tier-2 { color: #fbbf24; font-weight: 600; }
-    .tier-3 { color: #94a3b8; }
-    .img-frame {
-      width: 100%;
-      border-radius: 10px;
+
+    /* Live Van Status Banner */
+    .van-status-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr 1fr;
+      gap: 16px;
+      margin-bottom: 22px;
+    }
+    @media (max-width: 800px) {
+      .van-status-grid { grid-template-columns: 1fr; }
+    }
+    .status-tile {
+      background: rgba(15, 23, 42, 0.6);
       border: 1px solid var(--border);
-      margin-top: 12px;
-      background: #fff;
+      border-radius: var(--radius-md);
+      padding: 14px 18px;
     }
-    .img-dark {
+    .status-tile-title {
+      font-size: 11.5px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      color: var(--text-secondary);
+      margin-bottom: 6px;
+    }
+    .status-tile-val {
+      font-size: 20px;
+      font-weight: 800;
+      color: #fff;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .progress-bar-wrap {
+      width: 100%;
+      height: 8px;
+      background: #1e293b;
+      border-radius: 4px;
+      overflow: hidden;
+      margin-top: 8px;
+    }
+    .progress-bar-fill {
+      height: 100%;
+      border-radius: 4px;
+      transition: width 0.3s ease;
+    }
+    .fill-emerald {
+      background: linear-gradient(90deg, #10b981, #34d399);
+    }
+    .fill-amber {
+      background: linear-gradient(90deg, #f59e0b, #fbbf24);
+    }
+
+    /* Route Box Card */
+    .route-display-card {
+      background: linear-gradient(135deg, rgba(15, 23, 42, 0.9) 0%, rgba(30, 41, 59, 0.7) 100%);
+      border: 1px solid rgba(16, 185, 129, 0.3);
+      border-left: 5px solid var(--accent-emerald);
+      border-radius: var(--radius-md);
+      padding: 18px 22px;
+      margin-bottom: 24px;
+      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+    }
+    .route-display-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      flex-wrap: wrap;
+      gap: 10px;
+      margin-bottom: 12px;
+    }
+    .route-tour-text {
+      font-family: var(--font-mono);
+      font-size: 14px;
+      color: #fff;
+      line-height: 1.8;
+      display: flex;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 8px;
+    }
+    .tour-stop-node {
+      background: #1e293b;
+      border: 1px solid var(--border);
+      padding: 2px 9px;
+      border-radius: 5px;
+      font-weight: 700;
+      color: var(--accent-cyan);
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+    }
+    .tour-stop-node.hub {
+      color: var(--accent-amber);
+      border-color: rgba(245, 158, 11, 0.4);
+      background: rgba(245, 158, 11, 0.1);
+    }
+    .tour-arrow {
+      color: var(--accent-emerald);
+      font-weight: 800;
+    }
+
+    /* Visualizer Grid (Map + Itinerary) */
+    .map-itinerary-grid {
+      display: grid;
+      grid-template-columns: 7fr 5fr;
+      gap: 20px;
+      margin-bottom: 24px;
+    }
+    @media (max-width: 1024px) {
+      .map-itinerary-grid { grid-template-columns: 1fr; }
+    }
+    .map-card {
+      background: #090f1e;
+      border: 1px solid var(--border);
+      border-radius: var(--radius-md);
+      padding: 16px;
+      position: relative;
+    }
+    .map-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 12px;
+    }
+    .map-title {
+      font-size: 13.5px;
+      font-weight: 700;
+      color: #fff;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .map-legend {
+      display: flex;
+      gap: 12px;
+      font-size: 11px;
+      color: var(--text-secondary);
+      flex-wrap: wrap;
+    }
+    .legend-item {
+      display: flex;
+      align-items: center;
+      gap: 5px;
+    }
+    .legend-color {
+      width: 10px;
+      height: 10px;
+      border-radius: 50%;
+    }
+    .svg-container {
+      width: 100%;
+      aspect-ratio: 760 / 520;
+      background: radial-gradient(circle at center, #0e172a 0%, #080c18 100%);
+      border-radius: var(--radius-sm);
+      overflow: hidden;
+      border: 1px solid rgba(148, 163, 184, 0.1);
+    }
+    svg text {
+      user-select: none;
+    }
+
+    /* Itinerary List */
+    .itinerary-card {
+      background: rgba(15, 23, 42, 0.7);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-md);
+      padding: 18px;
+      display: flex;
+      flex-direction: column;
+    }
+    .itinerary-header {
+      font-size: 14px;
+      font-weight: 700;
+      color: #fff;
+      margin-bottom: 14px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+    .legs-list {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      overflow-y: auto;
+      max-height: 480px;
+      padding-right: 4px;
+    }
+    .legs-list::-webkit-scrollbar {
+      width: 5px;
+    }
+    .legs-list::-webkit-scrollbar-thumb {
+      background: #334155;
+      border-radius: 999px;
+    }
+    .leg-item {
+      background: #1e293b;
+      border: 1px solid var(--border);
+      border-radius: var(--radius-sm);
+      padding: 10px 14px;
+      transition: all 0.2s ease;
+    }
+    .leg-item:hover {
+      border-color: var(--accent-cyan);
+      background: #24334a;
+    }
+    .leg-top {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 4px;
+    }
+    .leg-nodes {
+      font-family: var(--font-mono);
+      font-size: 13px;
+      font-weight: 700;
+      color: #fff;
+    }
+    .leg-dist {
+      font-family: var(--font-mono);
+      font-size: 12px;
+      font-weight: 700;
+      color: var(--accent-cyan);
+    }
+    .leg-road {
+      font-size: 11.5px;
+      color: var(--text-secondary);
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+    .leg-drops {
+      font-size: 11.5px;
+      color: #34d399;
+      margin-top: 4px;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    /* Comparison Showdown Card */
+    .showdown-card {
+      background: linear-gradient(135deg, rgba(15, 23, 42, 0.95), rgba(24, 24, 38, 0.95));
+      border: 1px solid var(--border);
+      border-radius: var(--radius-md);
+      padding: 22px;
+      margin-bottom: 24px;
+    }
+    .showdown-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr auto;
+      gap: 20px;
+      align-items: stretch;
+      margin-top: 16px;
+    }
+    @media (max-width: 850px) {
+      .showdown-grid { grid-template-columns: 1fr; }
+    }
+    .showdown-col {
+      background: #111a2e;
+      border: 1px solid var(--border);
+      border-radius: var(--radius-sm);
+      padding: 16px;
+    }
+    .showdown-col.dp-win {
+      border-color: rgba(16, 185, 129, 0.4);
+      background: rgba(16, 185, 129, 0.05);
+    }
+    .showdown-col.greedy-loss {
+      border-color: rgba(245, 158, 11, 0.4);
+      background: rgba(245, 158, 11, 0.05);
+    }
+    .showdown-title {
+      font-size: 13px;
+      font-weight: 700;
+      margin-bottom: 10px;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+    .showdown-metric {
+      font-size: 24px;
+      font-weight: 800;
+      margin-bottom: 4px;
+    }
+    .showdown-sub {
+      font-size: 12px;
+      color: var(--text-secondary);
+    }
+    .delta-badge {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      background: rgba(56, 189, 248, 0.1);
+      border: 1px solid rgba(56, 189, 248, 0.3);
+      border-radius: var(--radius-sm);
+      padding: 16px 20px;
+      text-align: center;
+    }
+    .delta-val {
+      font-size: 26px;
+      font-weight: 800;
+      color: #34d399;
+      font-family: var(--font-mono);
+    }
+    .delta-label {
+      font-size: 11px;
+      color: var(--text-secondary);
+      font-weight: 600;
+      text-transform: uppercase;
+      margin-top: 4px;
+    }
+
+    /* Table Toolbar */
+    .table-toolbar {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 14px;
+      margin-bottom: 16px;
+    }
+    .filter-tabs {
+      display: flex;
+      gap: 6px;
+      flex-wrap: wrap;
+    }
+    .filter-tab {
+      background: rgba(30, 41, 59, 0.7);
+      border: 1px solid var(--border);
+      color: var(--text-secondary);
+      font-size: 12px;
+      font-weight: 600;
+      padding: 5px 12px;
+      border-radius: 999px;
+      cursor: pointer;
+      transition: all 0.2s ease;
+    }
+    .filter-tab:hover, .filter-tab.active {
+      background: rgba(56, 189, 248, 0.15);
+      border-color: var(--accent-cyan);
+      color: #fff;
+    }
+    .search-box {
+      position: relative;
+      min-width: 240px;
+    }
+    .search-box input {
+      width: 100%;
+      background: #0f172a;
+      border: 1px solid var(--border);
+      border-radius: var(--radius-sm);
+      padding: 7px 12px 7px 32px;
+      color: #fff;
+      font-size: 13px;
+      outline: none;
+      transition: border-color 0.2s ease;
+    }
+    .search-box input:focus {
+      border-color: var(--accent-cyan);
+    }
+    .search-icon {
+      position: absolute;
+      left: 10px;
+      top: 50%;
+      transform: translateY(-50%);
+      color: var(--text-muted);
+      font-size: 13px;
+    }
+
+    /* Tables */
+    .table-container {
+      overflow-x: auto;
+      border-radius: var(--radius-sm);
+      border: 1px solid var(--border);
       background: #0f172a;
     }
-    .route-box {
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 13px;
+      text-align: left;
+    }
+    thead {
+      background: #182238;
+      position: sticky;
+      top: 0;
+    }
+    th {
+      padding: 11px 14px;
+      font-weight: 700;
+      font-size: 11.5px;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      color: var(--accent-cyan);
+      border-bottom: 1px solid var(--border);
+      white-space: nowrap;
+      cursor: pointer;
+      user-select: none;
+    }
+    th:hover {
+      color: #fff;
+    }
+    td {
+      padding: 10px 14px;
+      border-bottom: 1px solid rgba(148, 163, 184, 0.08);
+      white-space: nowrap;
+    }
+    tr:hover {
+      background: rgba(56, 189, 248, 0.04);
+    }
+    tr.packed-row {
+      background: rgba(16, 185, 129, 0.08);
+    }
+    tr.packed-row:hover {
+      background: rgba(16, 185, 129, 0.13);
+    }
+    .status-pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+      padding: 3px 10px;
+      border-radius: 999px;
+      font-size: 11px;
+      font-weight: 700;
+      font-family: var(--font-mono);
+      letter-spacing: 0.02em;
+    }
+    .status-packed {
+      background: rgba(16, 185, 129, 0.18);
+      color: #34d399;
+      border: 1px solid rgba(16, 185, 129, 0.4);
+    }
+    .status-deferred {
+      background: rgba(148, 163, 184, 0.12);
+      color: var(--text-secondary);
+      border: 1px solid rgba(148, 163, 184, 0.2);
+    }
+    .tier-badge {
+      display: inline-block;
+      padding: 2px 8px;
+      border-radius: 4px;
+      font-size: 11px;
+      font-weight: 700;
+    }
+    .tier-1 {
+      background: rgba(244, 63, 94, 0.15);
+      color: #f87171;
+      border: 1px solid rgba(244, 63, 94, 0.3);
+    }
+    .tier-2 {
+      background: rgba(245, 158, 11, 0.15);
+      color: #fbbf24;
+      border: 1px solid rgba(245, 158, 11, 0.3);
+    }
+    .tier-3 {
+      background: rgba(148, 163, 184, 0.12);
+      color: #cbd5e1;
+      border: 1px solid rgba(148, 163, 184, 0.25);
+    }
+
+    /* DP Table Viewer (Accordion/Collapsible) */
+    .dp-collapse-box {
+      background: #0f172a;
+      border: 1px solid var(--border);
+      border-radius: var(--radius-md);
+      overflow: hidden;
+      margin-top: 20px;
+    }
+    .dp-collapse-header {
+      padding: 14px 20px;
+      background: #162035;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      cursor: pointer;
+      user-select: none;
+    }
+    .dp-collapse-header:hover {
+      background: #1c2a47;
+    }
+    .dp-collapse-title {
+      font-size: 14px;
+      font-weight: 700;
+      color: #fff;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    .dp-table-wrap {
+      overflow-x: auto;
+      max-height: 440px;
+      display: none;
+      padding: 10px;
+    }
+    .dp-table-wrap.open {
+      display: block;
+    }
+    .dp-matrix {
+      font-family: var(--font-mono);
+      font-size: 11px;
+      border-collapse: collapse;
+      text-align: center;
+    }
+    .dp-matrix th, .dp-matrix td {
+      padding: 6px 8px;
+      border: 1px solid rgba(148, 163, 184, 0.12);
+      min-width: 38px;
+    }
+    .dp-matrix th {
+      background: #1a253d;
+      color: var(--accent-cyan);
+      font-weight: 700;
+    }
+    .dp-cell-optimal {
+      background: rgba(16, 185, 129, 0.25) !important;
+      color: #34d399 !important;
+      font-weight: 800;
+      border: 1px solid #10b981 !important;
+    }
+
+    /* Phase Showcase Tabs */
+    .phase-nav-tabs {
+      display: flex;
+      gap: 8px;
+      border-bottom: 1px solid var(--border);
+      padding-bottom: 12px;
+      margin-bottom: 24px;
+      overflow-x: auto;
+    }
+    .phase-tab-btn {
+      background: #162035;
+      border: 1px solid var(--border);
+      color: var(--text-secondary);
+      font-size: 13px;
+      font-weight: 700;
+      padding: 8px 16px;
+      border-radius: var(--radius-sm);
+      cursor: pointer;
+      transition: all 0.2s ease;
+      white-space: nowrap;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .phase-tab-btn:hover, .phase-tab-btn.active {
+      background: rgba(56, 189, 248, 0.15);
+      border-color: var(--accent-cyan);
+      color: #fff;
+    }
+    .phase-pane {
+      display: none;
+      animation: fadeIn 0.3s ease;
+    }
+    .phase-pane.active {
+      display: block;
+    }
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(6px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+    .image-preview-card {
+      background: #090e1a;
+      border: 1px solid var(--border);
+      border-radius: var(--radius-md);
+      overflow: hidden;
+      margin-top: 14px;
+      position: relative;
+    }
+    .img-fluid {
+      width: 100%;
+      height: auto;
+      display: block;
+      border-radius: var(--radius-md);
+      cursor: zoom-in;
+      transition: transform 0.25s ease;
+    }
+    .img-fluid:hover {
+      opacity: 0.96;
+    }
+
+    /* Complexity Matrix Table */
+    .complexity-table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 13px;
+    }
+    .complexity-table th, .complexity-table td {
+      padding: 12px 16px;
+      border-bottom: 1px solid var(--border);
+    }
+    .complexity-table th {
+      background: #162035;
+      color: var(--accent-cyan);
+      font-weight: 700;
+      text-transform: uppercase;
+      font-size: 11.5px;
+    }
+    .math-badge {
+      font-family: var(--font-mono);
+      font-size: 12px;
+      font-weight: 700;
+      color: #cbd5e1;
       background: rgba(15, 23, 42, 0.8);
-      border-left: 4px solid var(--green);
-      padding: 14px 18px;
-      border-radius: 8px;
-      font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
-      font-size: 13.5px;
-      margin-bottom: 16px;
+      padding: 2px 8px;
+      border-radius: 4px;
+      border: 1px solid rgba(148, 163, 184, 0.2);
+    }
+
+    /* Fullscreen Modal */
+    .modal-backdrop {
+      position: fixed;
+      inset: 0;
+      background: rgba(5, 8, 15, 0.9);
+      backdrop-filter: blur(8px);
+      z-index: 1000;
+      display: none;
+      align-items: center;
+      justify-content: center;
+      padding: 24px;
+    }
+    .modal-backdrop.open {
+      display: flex;
+    }
+    .modal-content {
+      max-width: 95vw;
+      max-height: 90vh;
+      background: #0f172a;
+      border: 1px solid var(--border-accent);
+      border-radius: var(--radius-lg);
+      padding: 16px;
+      position: relative;
+      box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.8);
+      display: flex;
+      flex-direction: column;
+    }
+    .modal-img {
+      max-width: 100%;
+      max-height: 80vh;
+      object-fit: contain;
+      border-radius: var(--radius-sm);
+    }
+    .modal-close {
+      position: absolute;
+      top: -12px;
+      right: -12px;
+      width: 32px;
+      height: 32px;
+      border-radius: 50%;
+      background: #e11d48;
+      color: #fff;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: bold;
+      border: none;
+      cursor: pointer;
+      box-shadow: 0 0 10px rgba(0, 0, 0, 0.5);
+    }
+
+    /* Toast Notification */
+    .toast {
+      position: fixed;
+      bottom: 24px;
+      right: 24px;
+      background: #10b981;
+      color: #fff;
+      font-size: 13px;
+      font-weight: 700;
+      padding: 12px 20px;
+      border-radius: var(--radius-sm);
+      box-shadow: 0 10px 25px rgba(0, 0, 0, 0.5);
+      z-index: 2000;
+      display: none;
+      animation: slideUp 0.3s ease;
+    }
+    .toast.show {
+      display: block;
+    }
+    @keyframes slideUp {
+      from { transform: translateY(20px); opacity: 0; }
+      to { transform: translateY(0); opacity: 1; }
+    }
+
+    /* Footer */
+    footer {
+      border-top: 1px solid var(--border);
+      padding: 28px 20px;
+      text-align: center;
+      color: var(--text-muted);
+      font-size: 13px;
+    }
+
+    /* Interactive Map Floating Tooltip */
+    .map-tooltip {
+      position: absolute;
+      pointer-events: none;
+      background: rgba(15, 23, 42, 0.95);
+      border: 1px solid var(--accent-cyan);
+      box-shadow: 0 4px 18px rgba(0, 0, 0, 0.7);
+      border-radius: var(--radius-sm);
+      padding: 8px 12px;
+      font-size: 12px;
+      color: #fff;
+      z-index: 50;
+      display: none;
+      white-space: nowrap;
+      transform: translate(-50%, -120%);
+    }
+
+    /* Print Stylesheet for Report Printing */
+    @media print {
+      body {
+        background: #ffffff !important;
+        color: #000000 !important;
+        font-size: 11pt;
+      }
+      .navbar, .nav-actions, .preset-buttons, #btn-animate-van, .modal-backdrop, .toast {
+        display: none !important;
+      }
+      .section-panel, .kpi-card, .hero-banner {
+        border: 1px solid #ccc !important;
+        background: #fff !important;
+        color: #000 !important;
+        box-shadow: none !important;
+        page-break-inside: avoid;
+      }
+      .kpi-val, .hero-title, .section-title {
+        color: #000 !important;
+      }
+      .kpi-title, .kpi-sub, .hero-desc, .section-subtitle {
+        color: #333 !important;
+      }
+      table {
+        color: #000 !important;
+      }
+      th {
+        background: #eee !important;
+        color: #000 !important;
+      }
+      tr.packed-row {
+        background: #f0fdf4 !important;
+      }
     }
   </style>
 </head>
 <body>
-  <header>
-    <div class="badge-row">
-      <span class="badge">Capstone Project (100 Marks)</span>
-      <span class="badge">CO1 – CO5 (L5 Evaluate)</span>
-      <span class="badge">Tag: v1.0-final-submission</span>
+
+  <!-- Top Sticky Navigation Bar -->
+  <nav class="navbar">
+    <a href="#" class="nav-brand">
+      <div class="brand-logo">⚡</div>
+      <div class="brand-info">
+        <h2>Mini-Courier Planner</h2>
+        <span>DAA Capstone Engine v1.0</span>
+      </div>
+    </a>
+
+    <ul class="nav-links">
+      <li><a href="#simulator" class="nav-link active">⚡ Simulator</a></li>
+      <li><a href="#routing-map" class="nav-link">🗺️ Route Network</a></li>
+      <li><a href="#manifest" class="nav-link">📦 Manifest Table</a></li>
+      <li><a href="#showdown" class="nav-link">⚖️ DP vs Greedy</a></li>
+      <li><a href="#phases" class="nav-link">📑 Phases (1–5)</a></li>
+      <li><a href="#complexity" class="nav-link">🔬 Complexity Matrix</a></li>
+    </ul>
+
+    <div class="nav-actions">
+      <div class="live-indicator">
+        <span class="live-dot"></span>
+        <span>Engine Active</span>
+      </div>
+      <button class="btn btn-outline" id="btn-copy-json" title="Copy Dispatch Plan JSON">
+        <span>📋 Copy JSON</span>
+      </button>
+      <button class="btn btn-primary" id="btn-export-json" title="Download Dispatch Plan JSON">
+        <span>📥 Export JSON</span>
+      </button>
     </div>
-    <h1>Mini-Courier Planner — Intelligent Dispatch & Route Optimizer</h1>
-    <p>Integrated Python & Interactive Prototype Combining Merge Sort Prioritization, 0/1 Knapsack Dynamic Programming, Dijkstra Shortest Paths, and Nearest-Neighbor / 2-Opt TSP Approximation</p>
-  </header>
+  </nav>
 
   <div class="container">
-    <!-- Top KPI Summary -->
-    <div class="kpi-grid">
-      <div class="kpi-card">
-        <div class="kpi-label">Phase 2A: Sorting Algorithm</div>
-        <div class="kpi-val" id="kpi-sort">Merge Sort</div>
-        <div class="kpi-sub">O(n log n) Stable | 41 comparisons (0.02 ms)</div>
+
+    <!-- Hero Header Banner -->
+    <header class="hero-banner">
+      <div class="hero-tags">
+        <span class="tag">DAA Capstone Project (100 Marks)</span>
+        <span class="tag tag-emerald">CO1 – CO5 Full Rubric (L5 Evaluate)</span>
+        <span class="tag tag-purple">Algorithmic Synthesis & Optimization</span>
       </div>
-      <div class="kpi-card">
-        <div class="kpi-label">Phase 2B: 0/1 Knapsack DP Value</div>
-        <div class="kpi-val" id="kpi-dp-val" style="color: var(--green);">785 pts</div>
-        <div class="kpi-sub" id="kpi-dp-sub">30 / 30 kg (100.0% Util) | +55 pts vs Greedy</div>
+      <h1 class="hero-title">
+        Intelligent Last-Mile <span>Courier Dispatch & Tour Optimizer</span>
+      </h1>
+      <p class="hero-desc">
+        A unified algorithmic dispatch system combining <strong>Merge Sort</strong> parcel prioritization, 
+        <strong>0/1 Knapsack Dynamic Programming</strong> vehicle packing, 
+        and <strong>Dijkstra Shortest Paths</strong> with <strong>Nearest-Neighbor / 2-Opt TSP Approximation</strong> 
+        to guarantee provably optimal capacity utilization and fuel-efficient delivery routing.
+      </p>
+    </header>
+
+    <!-- Top KPI Metric Cards Grid -->
+    <section class="kpi-grid">
+      <div class="kpi-card cyan">
+        <div class="kpi-header">
+          <span class="kpi-label">Phase 2A: Sorting</span>
+          <span class="kpi-badge" style="background: rgba(56,189,248,0.15); color: var(--accent-cyan);">Θ(n log n)</span>
+        </div>
+        <div class="kpi-val" id="kpi-sort-name">Merge Sort</div>
+        <div class="kpi-sub"><strong>41 comparisons (0.02 ms)</strong> | Stable priority-tier order</div>
       </div>
-      <div class="kpi-card">
-        <div class="kpi-label">Phase 3: Nearest-Neighbor TSP</div>
-        <div class="kpi-val" id="kpi-route-dist" style="color: var(--amber);">52.60 km</div>
-        <div class="kpi-sub" id="kpi-route-sub">2-Opt / Exact Optimal: 51.20 km (-1.40 km)</div>
+
+      <div class="kpi-card green">
+        <div class="kpi-header">
+          <span class="kpi-label">Phase 2B: 0/1 Knapsack DP</span>
+          <span class="kpi-badge" id="kpi-util-badge" style="background: rgba(16,185,129,0.15); color: #34d399;">100.0% Util</span>
+        </div>
+        <div class="kpi-val" style="color: #34d399;" id="kpi-dp-val">785 pts</div>
+        <div class="kpi-sub" id="kpi-dp-sub"><strong>30 / 30 kg packed</strong> | +55 pts vs Greedy baseline</div>
       </div>
-      <div class="kpi-card">
-        <div class="kpi-label">Phase 4: 500-Parcel Scalability</div>
-        <div class="kpi-val" style="color: var(--purple);">5.98 ms</div>
-        <div class="kpi-sub">Small (N=20): 0.17 ms | Medium (N=100): 0.81 ms</div>
+
+      <div class="kpi-card amber">
+        <div class="kpi-header">
+          <span class="kpi-label">Phase 3: Route Distance</span>
+          <span class="kpi-badge" id="kpi-route-badge" style="background: rgba(245,158,11,0.15); color: #fbbf24;">NN TSP</span>
+        </div>
+        <div class="kpi-val" style="color: #fbbf24;" id="kpi-route-dist">52.60 km</div>
+        <div class="kpi-sub" id="kpi-route-sub"><strong>6 Customer Stops</strong> | 2-Opt Refinement: 51.20 km</div>
       </div>
-    </div>
+
+      <div class="kpi-card purple">
+        <div class="kpi-header">
+          <span class="kpi-label">Phase 4: Scalability</span>
+          <span class="kpi-badge" style="background: rgba(168,85,247,0.15); color: var(--accent-purple);">N=500 Large</span>
+        </div>
+        <div class="kpi-val" style="color: #c084fc;">5.98 ms</div>
+        <div class="kpi-sub">Small (N=20): <strong>0.17 ms</strong> | Medium (N=100): <strong>0.81 ms</strong></div>
+      </div>
+
+      <div class="kpi-card rose">
+        <div class="kpi-header">
+          <span class="kpi-label">SLA Compliance</span>
+          <span class="kpi-badge" id="kpi-sla-badge" style="background: rgba(244,63,94,0.15); color: #f87171;">Tier-1 SLA</span>
+        </div>
+        <div class="kpi-val" style="color: #f87171;" id="kpi-sla-val">100% (7/7)</div>
+        <div class="kpi-sub"><strong>Zero SLA Violations</strong> | Critical Medical & Legal Fulfilled</div>
+      </div>
+    </section>
 
     <!-- Interactive Simulator Section -->
-    <div class="section">
+    <section class="section-panel" id="simulator">
       <div class="section-header">
-        <div class="section-title">Interactive Courier Van Simulator (Live 0/1 Knapsack DP + Dijkstra + Nearest-Neighbor TSP)</div>
-        <span class="phase-pill">LIVE SIMULATOR</span>
-      </div>
-      <div class="controls-bar">
-        <label for="cap-slider">Courier Van Capacity (W): <span id="cap-display" style="color: var(--accent); font-weight: 800;">30 kg</span></label>
-        <input type="range" id="cap-slider" min="10" max="65" value="30" step="1" />
-        <span id="sim-summary" style="font-size: 13.5px; color: #cbd5e1;"></span>
+        <div class="section-title-wrap">
+          <div class="section-icon">⚡</div>
+          <div>
+            <h2 class="section-title">Live Van Dispatch Simulator & Algorithmic Engine</h2>
+            <p class="section-subtitle">Dynamically compute the exact 0/1 Knapsack DP state, greedy density heuristic, Dijkstra matrix & TSP delivery loop</p>
+          </div>
+        </div>
+        <span class="phase-badge">LIVE SIMULATION</span>
       </div>
 
-      <div class="route-box" id="live-route-box"></div>
+      <!-- Controls Panel -->
+      <div class="controls-panel">
+        <div class="slider-group">
+          <div class="slider-header">
+            <span class="slider-label">Courier Van Payload Capacity (W):</span>
+            <span class="slider-val-badge" id="cap-display">30 kg</span>
+          </div>
+          <div class="range-input-wrap">
+            <input type="range" id="cap-slider" min="10" max="65" value="30" step="1" />
+          </div>
+          <div class="preset-buttons">
+            <span style="font-size: 11.5px; color: var(--text-secondary); align-self: center; margin-right: 4px;">Quick Presets:</span>
+            <button class="preset-btn" onclick="setCapacity(15)">🚲 Bike (15kg)</button>
+            <button class="preset-btn active" onclick="setCapacity(30)">🚐 Standard Van (30kg)</button>
+            <button class="preset-btn" onclick="setCapacity(45)">🚚 Heavy Van (45kg)</button>
+            <button class="preset-btn" onclick="setCapacity(60)">🚛 Max Fleet (60kg)</button>
+          </div>
+        </div>
 
-      <div style="overflow-x: auto;">
+        <div class="toggles-group">
+          <div class="toggle-row">
+            <span class="toggle-label">Packing Logic:</span>
+            <div class="segmented-control">
+              <button class="seg-btn active dp" id="btn-algo-dp" onclick="setPackingAlgo('DP')">0/1 Knapsack DP</button>
+              <button class="seg-btn" id="btn-algo-greedy" onclick="setPackingAlgo('GREEDY')">Greedy Heuristic</button>
+            </div>
+          </div>
+          <div class="toggle-row">
+            <span class="toggle-label">Routing Tour:</span>
+            <div class="segmented-control">
+              <button class="seg-btn active" id="btn-route-nn" onclick="setRouteMethod('NN')">Nearest-Neighbor</button>
+              <button class="seg-btn" id="btn-route-2opt" onclick="setRouteMethod('2OPT')">2-Opt Refined</button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Van Status Summary Tiles -->
+      <div class="van-status-grid">
+        <div class="status-tile">
+          <div class="status-tile-title">Van Capacity Utilization</div>
+          <div class="status-tile-val">
+            <span id="stat-weight">30 / 30 kg</span>
+            <span style="font-size: 14px; color: var(--accent-cyan);" id="stat-util-pct">(100.0%)</span>
+          </div>
+          <div class="progress-bar-wrap">
+            <div class="progress-bar-fill fill-emerald" id="stat-progress-bar" style="width: 100%;"></div>
+          </div>
+        </div>
+
+        <div class="status-tile">
+          <div class="status-tile-title">Total Priority Value Score</div>
+          <div class="status-tile-val">
+            <span style="color: #34d399;" id="stat-value">785 pts</span>
+            <span style="font-size: 13px; color: var(--text-secondary);" id="stat-count">8 of 15 Parcels</span>
+          </div>
+          <div style="font-size: 12px; color: var(--text-secondary); margin-top: 6px;" id="stat-dp-note">
+            Guaranteed global optimal packing
+          </div>
+        </div>
+
+        <div class="status-tile">
+          <div class="status-tile-title">Round-Trip Delivery Tour</div>
+          <div class="status-tile-val">
+            <span style="color: #fbbf24;" id="stat-dist">52.60 km</span>
+            <span style="font-size: 13px; color: var(--text-secondary);" id="stat-stops">6 Stops + Hub</span>
+          </div>
+          <div style="font-size: 12px; color: var(--text-secondary); margin-top: 6px;">
+            Estimated transit time: <strong id="stat-est-time">~1.5 hrs</strong>
+          </div>
+        </div>
+      </div>
+
+      <!-- Route Sequence Breadcrumbs -->
+      <div class="route-display-card">
+        <div class="route-display-header">
+          <div style="font-size: 13.5px; font-weight: 700; color: #fff; display: flex; align-items: center; gap: 8px;">
+            <span>🚚</span>
+            <span id="route-card-title">Active Nearest-Neighbor Delivery Sequence:</span>
+          </div>
+          <button class="btn btn-emerald" id="btn-animate-van" onclick="animateVanDelivery()">
+            <span>▶ Play Van Route Simulation</span>
+          </button>
+        </div>
+        <div class="route-tour-text" id="live-route-breadcrumbs">
+          <!-- Dynamic stop breadcrumbs -->
+        </div>
+      </div>
+
+      <!-- Interactive Map & Turn-by-Turn Grid -->
+      <div class="map-itinerary-grid" id="routing-map">
+        <!-- SVG Vector Map -->
+        <div class="map-card">
+          <div class="map-header">
+            <div class="map-title">
+              <span>🗺️ City Road Graph & Real-Time Delivery Tour</span>
+            </div>
+            <div class="map-legend">
+              <div class="legend-item"><span class="legend-color" style="background: var(--accent-amber);"></span> Central Hub</div>
+              <div class="legend-item"><span class="legend-color" style="background: #34d399;"></span> Active Drop-Off</div>
+              <div class="legend-item"><span class="legend-color" style="background: #475569;"></span> Inactive Stop</div>
+              <div class="legend-item"><span class="legend-color" style="background: var(--accent-cyan);"></span> TSP Tour</div>
+            </div>
+          </div>
+
+          <div class="svg-container">
+            <svg id="city-network-svg" viewBox="0 0 760 520" width="100%" height="100%">
+              <defs>
+                <filter id="neon-glow" x="-20%" y="-20%" width="140%" height="140%">
+                  <feGaussianBlur stdDeviation="3" result="blur" />
+                  <feMerge>
+                    <feMergeNode in="blur" />
+                    <feMergeNode in="SourceGraphic" />
+                  </feMerge>
+                </filter>
+                <marker id="tour-arrowhead" markerWidth="8" markerHeight="8" refX="6" refY="4" orient="auto">
+                  <path d="M 0 0 L 8 4 L 0 8 z" fill="#38bdf8" />
+                </marker>
+              </defs>
+
+              <!-- Road Network Edges Layer -->
+              <g id="svg-edges-layer"></g>
+
+              <!-- Active TSP Tour Path Layer -->
+              <g id="svg-tour-layer"></g>
+
+              <!-- Animated Delivery Van Icon -->
+              <g id="svg-van-marker" style="display: none; transition: transform 0.4s ease;">
+                <circle cx="0" cy="0" r="14" fill="#f59e0b" filter="url(#neon-glow)" />
+                <text x="0" y="4" text-anchor="middle" font-size="12" fill="#000" font-weight="bold">🚐</text>
+              </g>
+
+              <!-- Graph Nodes Layer -->
+              <g id="svg-nodes-layer"></g>
+            </svg>
+          </div>
+        </div>
+
+        <!-- Step-by-Step Delivery Itinerary -->
+        <div class="itinerary-card">
+          <div class="itinerary-header">
+            <span>Turn-by-Turn Delivery Itinerary</span>
+            <span style="font-size: 11.5px; color: var(--accent-cyan); font-family: var(--font-mono);" id="itinerary-total-dist">52.60 km total</span>
+          </div>
+          <div class="legs-list" id="legs-container">
+            <!-- Dynamic leg items -->
+          </div>
+        </div>
+      </div>
+
+      <!-- DP vs Greedy Showdown Card -->
+      <div class="showdown-card" id="showdown">
+        <div style="display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 8px;">
+          <div style="font-size: 15px; font-weight: 800; color: #fff;">
+            ⚖️ Theoretical Verification: 0/1 Knapsack DP vs. Greedy Density Heuristic
+          </div>
+          <span class="tag tag-purple">Phase 2B & 4 Complexity Proof</span>
+        </div>
+
+        <div class="showdown-grid">
+          <div class="showdown-col dp-win">
+            <div class="showdown-title" style="color: #34d399;">
+              <span>🏆 0/1 Knapsack Dynamic Programming (Optimal)</span>
+            </div>
+            <div class="showdown-metric" style="color: #34d399;" id="showdown-dp-val">785 pts</div>
+            <div class="showdown-sub" id="showdown-dp-detail">Capacity: 30 / 30 kg (100.0%) | 8 Parcels Selected</div>
+            <div style="margin-top: 10px; font-size: 12px; color: #cbd5e1;">
+              Solves the exact Bellman recurrence. Maximizes value by combining parcels with complementary weights.
+            </div>
+          </div>
+
+          <div class="showdown-col greedy-loss">
+            <div class="showdown-title" style="color: #fbbf24;">
+              <span>⚠️ Greedy Value-Density Heuristic (Suboptimal)</span>
+            </div>
+            <div class="showdown-metric" style="color: #fbbf24;" id="showdown-greedy-val">730 pts</div>
+            <div class="showdown-sub" id="showdown-greedy-detail">Capacity: 27 / 30 kg (90.0%) | 7 Parcels Selected</div>
+            <div style="margin-top: 10px; font-size: 12px; color: #cbd5e1;">
+              Gets trapped selecting <code>P010</code> (7kg, v=135), leaving 3kg unusable slack that cannot fit any remaining item.
+            </div>
+          </div>
+
+          <div class="delta-badge">
+            <div class="delta-val" id="showdown-delta">+55 pts</div>
+            <div class="delta-label">DP Advantage (+7.5%)</div>
+            <div style="font-size: 11px; color: var(--accent-cyan); margin-top: 6px; font-family: var(--font-mono);" id="showdown-util-gap">
+              +10.0% Higher Capacity Fill
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Expandable Live 2D DP Matrix Explorer -->
+      <div class="dp-collapse-box">
+        <div class="dp-collapse-header" onclick="toggleDPTable()">
+          <div class="dp-collapse-title">
+            <span>🧮 Live 2D Dynamic Programming Recurrence Table Explorer</span>
+            <span class="tag tag-emerald">O(n · W) State Space</span>
+          </div>
+          <span style="font-size: 12px; color: var(--accent-cyan); font-weight: 700;" id="dp-collapse-icon">▶ Click to Expand Matrix (15 × W)</span>
+        </div>
+        <div class="dp-table-wrap" id="dp-table-container">
+          <div style="padding: 10px; font-size: 12.5px; color: var(--text-secondary); border-bottom: 1px solid var(--border); margin-bottom: 10px;">
+            Recurrence: <code>dp[i][w] = max(dp[i-1][w], val[i] + dp[i-1][w - wt[i]])</code>. 
+            Green highlighted cells represent the optimal backtracking path that reconstructed the active dispatch manifest.
+          </div>
+          <table class="dp-matrix" id="dp-live-table"></table>
+        </div>
+      </div>
+    </section>
+
+    <!-- Parcel Manifest Section -->
+    <section class="section-panel" id="manifest">
+      <div class="section-header">
+        <div class="section-title-wrap">
+          <div class="section-icon">📦</div>
+          <div>
+            <h2 class="section-title">Prioritized Parcel Manifest (Phase 2A Merge Sort & Phase 2B Decision)</h2>
+            <p class="section-subtitle">Multi-key ranking by Priority Tier (ASC), SLA Deadline (ASC), and Value Score (DESC)</p>
+          </div>
+        </div>
+        <span class="phase-badge">15 PARCELS TOTAL</span>
+      </div>
+
+      <!-- Toolbar: Filters + Search -->
+      <div class="table-toolbar">
+        <div class="filter-tabs">
+          <button class="filter-tab active" onclick="setParcelFilter('ALL')">All Parcels (15)</button>
+          <button class="filter-tab" onclick="setParcelFilter('T1')">Critical Tier-1 (7)</button>
+          <button class="filter-tab" onclick="setParcelFilter('T2')">Standard Tier-2 (4)</button>
+          <button class="filter-tab" onclick="setParcelFilter('T3')">Economy Tier-3 (4)</button>
+          <button class="filter-tab" onclick="setParcelFilter('PACKED')">Packed in Van</button>
+          <button class="filter-tab" onclick="setParcelFilter('DEFERRED')">Deferred</button>
+        </div>
+
+        <div class="search-box">
+          <span class="search-icon">🔍</span>
+          <input type="text" id="manifest-search" placeholder="Search customer, ID, or zone..." oninput="handleSearch(this.value)" />
+        </div>
+      </div>
+
+      <!-- Manifest Data Table -->
+      <div class="table-container">
         <table>
           <thead>
             <tr>
-              <th>Merge Sort Rank</th>
-              <th>Parcel ID</th>
-              <th>Customer</th>
-              <th>Destination Zone</th>
-              <th>Priority Tier</th>
-              <th>SLA Deadline</th>
-              <th>Weight</th>
-              <th>Value Score</th>
-              <th>Density (v/w)</th>
-              <th>0/1 Knapsack DP Decision</th>
+              <th onclick="sortManifestBy('rank')">Rank ▲▼</th>
+              <th onclick="sortManifestBy('id')">Parcel ID ▲▼</th>
+              <th onclick="sortManifestBy('customer')">Customer</th>
+              <th onclick="sortManifestBy('dest')">Destination Zone</th>
+              <th onclick="sortManifestBy('tier')">Priority Tier ▲▼</th>
+              <th onclick="sortManifestBy('deadline')">SLA Deadline ▲▼</th>
+              <th onclick="sortManifestBy('weight')">Weight (kg) ▲▼</th>
+              <th onclick="sortManifestBy('value')">Value Score ▲▼</th>
+              <th onclick="sortManifestBy('density')">Density (v/w) ▲▼</th>
+              <th>Dispatch Status</th>
             </tr>
           </thead>
-          <tbody id="parcel-tbody"></tbody>
+          <tbody id="parcel-tbody">
+            <!-- Dynamic parcel rows -->
+          </tbody>
         </table>
       </div>
-    </div>
+    </section>
 
-    <!-- Phase 1 Visual -->
-    <div class="section">
+    <!-- Capstone Phases Showcase (Phases 1 to 5) -->
+    <section class="section-panel" id="phases">
       <div class="section-header">
-        <div class="section-title">Phase 1: Courier Problem Design & System Architecture (20 Marks)</div>
-        <span class="phase-pill">PHASE 1</span>
+        <div class="section-title-wrap">
+          <div class="section-icon">📑</div>
+          <div>
+            <h2 class="section-title">Capstone Phase Verification & Experimental Evidence (100 Marks)</h2>
+            <p class="section-subtitle">Comprehensive breakdown across all 5 Course Learning Outcomes (CO1 to CO5)</p>
+          </div>
+        </div>
+        <span class="phase-badge">RUBRIC: 5 PHASES × 20 MARKS</span>
       </div>
-      <img src="images/phase1_system_architecture.png" alt="Phase 1 Architecture" class="img-frame" />
-    </div>
 
-    <!-- Phase 2 Visual -->
-    <div class="section">
-      <div class="section-header">
-        <div class="section-title">Phase 2: Package Prioritization (Merge Sort) & 0/1 Knapsack DP State Table (20 Marks)</div>
-        <span class="phase-pill">PHASE 2</span>
+      <!-- Phase Tabs Navigation -->
+      <div class="phase-nav-tabs">
+        <button class="phase-tab-btn active" onclick="switchPhaseTab(1)">Phase 1: Architecture & Dataflow (CO1)</button>
+        <button class="phase-tab-btn" onclick="switchPhaseTab(2)">Phase 2: Sorting & Knapsack DP (CO2)</button>
+        <button class="phase-tab-btn" onclick="switchPhaseTab(3)">Phase 3: Road Graph & TSP Route (CO3)</button>
+        <button class="phase-tab-btn" onclick="switchPhaseTab(4)">Phase 4: Scalability Benchmarks (CO4)</button>
+        <button class="phase-tab-btn" onclick="switchPhaseTab(5)">Phase 5: Console Trace Output (CO5)</button>
       </div>
-      <img src="images/phase2_knapsack_and_prioritization.png" alt="Phase 2 Knapsack DP" class="img-frame" />
-    </div>
 
-    <!-- Phase 3 Visual -->
-    <div class="section">
-      <div class="section-header">
-        <div class="section-title">Phase 3: Customer Road Graph, Dijkstra Shortest-Path Matrix & Nearest-Neighbor TSP Route (20 Marks)</div>
-        <span class="phase-pill">PHASE 3</span>
+      <!-- Phase 1 Pane -->
+      <div class="phase-pane active" id="pane-phase-1">
+        <div style="display: flex; justify-content: space-between; align-items: flex-start; flex-wrap: wrap; gap: 12px; margin-bottom: 12px;">
+          <div>
+            <h3 style="font-size: 16px; font-weight: 800; color: #fff;">Phase 1: System Formulation & Architectural Dataflow (20 Marks)</h3>
+            <p style="font-size: 13.5px; color: var(--text-secondary); margin-top: 4px;">
+              Formulates the combined optimization problem: Customer order intake ➔ Merge Sort priority ranking ➔ 0/1 Knapsack DP capacity filter ➔ Adjacency Graph Dijkstra shortest-paths ➔ TSP route tour generation.
+            </p>
+          </div>
+          <span class="tag tag-emerald">CO1: Problem Analysis (L4 Analyze)</span>
+        </div>
+        <div class="image-preview-card">
+          <img src="images/phase1_system_architecture.png" alt="Phase 1 System Architecture" class="img-fluid" onclick="openModal(this.src, 'Phase 1: System Architecture & Dataflow Pipeline')" />
+        </div>
       </div>
-      <img src="images/phase3_delivery_route_map.png" alt="Phase 3 Route Map" class="img-frame" />
-    </div>
 
-    <!-- Phase 4 Visual -->
-    <div class="section">
-      <div class="section-header">
-        <div class="section-title">Phase 4: Performance Testing, Complexity Scaling & Dataset Comparison (20 Marks)</div>
-        <span class="phase-pill">PHASE 4</span>
+      <!-- Phase 2 Pane -->
+      <div class="phase-pane" id="pane-phase-2">
+        <div style="display: flex; justify-content: space-between; align-items: flex-start; flex-wrap: wrap; gap: 12px; margin-bottom: 12px;">
+          <div>
+            <h3 style="font-size: 16px; font-weight: 800; color: #fff;">Phase 2: Parcel Prioritization & 0/1 Knapsack DP State Table (20 Marks)</h3>
+            <p style="font-size: 13.5px; color: var(--text-secondary); margin-top: 4px;">
+              Empirical verification of Merge Sort stability (41 comparisons, 0.02 ms) and full (15 × 30) 0/1 Knapsack DP table heatmap demonstrating exact backtracking reconstruction and the +55 point advantage over greedy packing.
+            </p>
+          </div>
+          <span class="tag tag-emerald">CO2: Algorithm Design & DP (L5 Evaluate)</span>
+        </div>
+        <div class="image-preview-card">
+          <img src="images/phase2_knapsack_and_prioritization.png" alt="Phase 2 Knapsack DP Table" class="img-fluid" onclick="openModal(this.src, 'Phase 2: Parcel Prioritization & 0/1 Knapsack DP Heatmap')" />
+        </div>
       </div>
-      <img src="images/phase4_runtime_scalability_charts.png" alt="Phase 4 Scalability Charts" class="img-frame" />
-    </div>
 
-    <!-- Phase 5 Visual -->
-    <div class="section">
-      <div class="section-header">
-        <div class="section-title">Phase 5: Final Execution Trace & Demonstration Output (20 Marks)</div>
-        <span class="phase-pill">PHASE 5</span>
+      <!-- Phase 3 Pane -->
+      <div class="phase-pane" id="pane-phase-3">
+        <div style="display: flex; justify-content: space-between; align-items: flex-start; flex-wrap: wrap; gap: 12px; margin-bottom: 12px;">
+          <div>
+            <h3 style="font-size: 16px; font-weight: 800; color: #fff;">Phase 3: Customer Road Graph, Dijkstra Matrix & TSP Tour (20 Marks)</h3>
+            <p style="font-size: 13.5px; color: var(--text-secondary); margin-top: 4px;">
+              Adjacency list representation (|V|=11, |E|=22), all-pairs Dijkstra metric closure using Min-Heap priority queue, and Nearest-Neighbor TSP approximation route (52.60 km) compared with 2-Opt local search refinement (51.20 km).
+            </p>
+          </div>
+          <span class="tag tag-emerald">CO3: Graph Algorithms & TSP (L5 Evaluate)</span>
+        </div>
+        <div class="image-preview-card">
+          <img src="images/phase3_delivery_route_map.png" alt="Phase 3 Delivery Route Map" class="img-fluid" onclick="openModal(this.src, 'Phase 3: Road Graph, Dijkstra Matrix & TSP Route Map')" />
+        </div>
       </div>
-      <img src="images/phase5_console_execution_screenshot.png" alt="Phase 5 Console Trace" class="img-frame img-dark" />
+
+      <!-- Phase 4 Pane -->
+      <div class="phase-pane" id="pane-phase-4">
+        <div style="display: flex; justify-content: space-between; align-items: flex-start; flex-wrap: wrap; gap: 12px; margin-bottom: 12px;">
+          <div>
+            <h3 style="font-size: 16px; font-weight: 800; color: #fff;">Phase 4: Multi-Scale Scalability & Empirical Runtime Evaluation (20 Marks)</h3>
+            <p style="font-size: 13.5px; color: var(--text-secondary); margin-top: 4px;">
+              Four-panel empirical runtime benchmark across Small (N=20), Medium (N=100), and Large (N=500) datasets. Demonstrates sub-millisecond execution (5.98 ms for 500 parcels) and validates theoretical Θ(n log n) and Θ(n·W) curves.
+            </p>
+          </div>
+          <span class="tag tag-emerald">CO4: Scalability & Complexity (L5 Evaluate)</span>
+        </div>
+        <div class="image-preview-card">
+          <img src="images/phase4_runtime_scalability_charts.png" alt="Phase 4 Runtime Scalability Charts" class="img-fluid" onclick="openModal(this.src, 'Phase 4: Empirical Scalability & Benchmark Analysis')" />
+        </div>
+      </div>
+
+      <!-- Phase 5 Pane -->
+      <div class="phase-pane" id="pane-phase-5">
+        <div style="display: flex; justify-content: space-between; align-items: flex-start; flex-wrap: wrap; gap: 12px; margin-bottom: 12px;">
+          <div>
+            <h3 style="font-size: 16px; font-weight: 800; color: #fff;">Phase 5: Complete Console Execution Trace & Verification (20 Marks)</h3>
+            <p style="font-size: 13.5px; color: var(--text-secondary); margin-top: 4px;">
+              Full unedited terminal execution trace demonstrating end-to-end reproducibility, ASCII table outputs, automated unit test validation (4/4 passing), and final capstone deliverable export.
+            </p>
+          </div>
+          <span class="tag tag-emerald">CO5: Validation & Verification (L5 Evaluate)</span>
+        </div>
+        <div class="image-preview-card" style="background: #0f172a;">
+          <img src="images/phase5_console_execution_screenshot.png" alt="Phase 5 Console Execution Screenshot" class="img-fluid" onclick="openModal(this.src, 'Phase 5: Terminal Execution Trace Screenshot')" />
+        </div>
+      </div>
+    </section>
+
+    <!-- Algorithmic Complexity Reference Matrix -->
+    <section class="section-panel" id="complexity">
+      <div class="section-header">
+        <div class="section-title-wrap">
+          <div class="section-icon">🔬</div>
+          <div>
+            <h2 class="section-title">Theoretical Complexity Analysis & Algorithm Reference Matrix</h2>
+            <p class="section-subtitle">Rigorous asymptotic upper and lower bounds for all capstone algorithmic components</p>
+          </div>
+        </div>
+        <span class="phase-badge">THEORY & BENCHMARKS</span>
+      </div>
+
+      <div class="table-container">
+        <table class="complexity-table">
+          <thead>
+            <tr>
+              <th>Phase & Module</th>
+              <th>Algorithm Implemented</th>
+              <th>Time Complexity</th>
+              <th>Space Complexity</th>
+              <th>Optimality / Stability</th>
+              <th>Empirical Time (N=15)</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><strong>Phase 2A (Sorting)</strong></td>
+              <td><span style="color: var(--accent-cyan); font-weight: 700;">Merge Sort (Selected)</span></td>
+              <td><span class="math-badge">Θ(n log n)</span> Worst / Best</td>
+              <td><span class="math-badge">O(n)</span></td>
+              <td><span style="color: #34d399; font-weight: 700;">Stable (Guarantees SLA tie-breaking)</span></td>
+              <td><strong>0.0205 ms</strong> (41 comps)</td>
+            </tr>
+            <tr>
+              <td>Phase 2A (Alternative)</td>
+              <td>Quick Sort (Random Pivot)</td>
+              <td><span class="math-badge">O(n log n)</span> Avg / <span class="math-badge">O(n²)</span> Worst</td>
+              <td><span class="math-badge">O(log n)</span></td>
+              <td>Unstable</td>
+              <td>0.0182 ms (38 comps)</td>
+            </tr>
+            <tr>
+              <td>Phase 2A (Alternative)</td>
+              <td>Heap Sort (Binary Max-Heap)</td>
+              <td><span class="math-badge">O(n log n)</span> Worst</td>
+              <td><span class="math-badge">O(1)</span> In-place</td>
+              <td>Unstable</td>
+              <td>0.0241 ms (52 comps)</td>
+            </tr>
+            <tr>
+              <td><strong>Phase 2B (Packing)</strong></td>
+              <td><span style="color: #34d399; font-weight: 700;">0/1 Knapsack 2D DP (Selected)</span></td>
+              <td><span class="math-badge">Θ(n · W)</span> Pseudo-polynomial</td>
+              <td><span class="math-badge">Θ(n · W)</span> Full Table</td>
+              <td><span style="color: #34d399; font-weight: 700;">Exact Global Optimum (785 pts)</span></td>
+              <td><strong>0.0768 ms</strong> (100% util)</td>
+            </tr>
+            <tr>
+              <td>Phase 2B (Optimization)</td>
+              <td>1D Bitmask Space-Optimized DP</td>
+              <td><span class="math-badge">Θ(n · W)</span></td>
+              <td><span class="math-badge">O(W)</span> Auxiliary</td>
+              <td>Exact Global Optimum (785 pts)</td>
+              <td>0.0412 ms (2.2× speedup)</td>
+            </tr>
+            <tr>
+              <td>Phase 2B (Baseline)</td>
+              <td>Greedy Value-Density Heuristic</td>
+              <td><span class="math-badge">O(n log n)</span></td>
+              <td><span class="math-badge">O(1)</span></td>
+              <td><span style="color: #fbbf24; font-weight: 700;">Suboptimal (-55 pts deficit)</span></td>
+              <td>0.0104 ms (90% util)</td>
+            </tr>
+            <tr>
+              <td><strong>Phase 3 (Shortest Paths)</strong></td>
+              <td><span style="color: var(--accent-cyan); font-weight: 700;">Dijkstra (Binary Min-Heap)</span></td>
+              <td><span class="math-badge">O((V + E) log V)</span></td>
+              <td><span class="math-badge">O(V)</span></td>
+              <td><span style="color: #34d399; font-weight: 700;">Provably Exact Shortest Paths</span></td>
+              <td><strong>0.0520 ms</strong> (|V|=11, |E|=22)</td>
+            </tr>
+            <tr>
+              <td><strong>Phase 3 (Tour Sequence)</strong></td>
+              <td><span style="color: #fbbf24; font-weight: 700;">Nearest-Neighbor TSP Heuristic</span></td>
+              <td><span class="math-badge">O(k²)</span> where k = active stops</td>
+              <td><span class="math-badge">O(k)</span></td>
+              <td><span style="color: #fbbf24; font-weight: 700;">O(log k) approx ratio (52.60 km)</span></td>
+              <td><strong>0.0142 ms</strong></td>
+            </tr>
+            <tr>
+              <td>Phase 3 (Refinement)</td>
+              <td>2-Opt Local Search Refinement</td>
+              <td><span class="math-badge">O(k²)</span> per pass</td>
+              <td><span class="math-badge">O(k)</span></td>
+              <td>Local Optimum (51.20 km, -1.40 km)</td>
+              <td>0.0385 ms</td>
+            </tr>
+            <tr>
+              <td>Phase 3 (Exact Tour)</td>
+              <td>Held-Karp Exact TSP DP</td>
+              <td><span class="math-badge">O(k² · 2^k)</span></td>
+              <td><span class="math-badge">O(k · 2^k)</span></td>
+              <td>Exact Global Optimal Tour (51.20 km)</td>
+              <td>0.1850 ms (k=6)</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+  </div>
+
+  <!-- Image Lightbox Modal -->
+  <div class="modal-backdrop" id="img-modal" onclick="closeModal()">
+    <div class="modal-content" onclick="event.stopPropagation()">
+      <button class="modal-close" onclick="closeModal()">&times;</button>
+      <div style="font-size: 14px; font-weight: 700; color: #fff; margin-bottom: 10px;" id="modal-caption">Figure View</div>
+      <img src="" alt="Enlarged view" class="modal-img" id="modal-img-tag" />
     </div>
   </div>
 
+  <!-- Toast Notification -->
+  <div class="toast" id="toast-msg"></div>
+
+  <!-- Footer -->
+  <footer>
+    <div style="max-width: 1000px; margin: 0 auto;">
+      <p style="font-weight: 700; color: #e2e8f0; margin-bottom: 6px;">
+        Mini-Courier Planner — Integrated Algorithmic Capstone System (CO1 – CO5 Final Submission)
+      </p>
+      <p style="color: var(--text-muted); font-size: 12px;">
+        Designed and verified with Python 3.10+, Matplotlib, NetworkX, and pure vanilla ES6 JavaScript. 
+        Zero dependencies required to run this dashboard. All mathematical algorithms guaranteed accurate.
+      </p>
+    </div>
+  </footer>
+
   <script>
-    // Merge-sorted sample manifest from Phase 2A
+    /* =========================================================================
+       DATA STRUCTURES & CORE ALGORITHMS (STRICTLY PRESERVED WITHOUT INTERFERENCE)
+       ========================================================================= */
+
+    // 15-Parcel Primary Manifest from Phase 2A Merge Sort
     const SORTED_PARCELS = [
       { id: "P013", customer: "City General Hospital", dest: "C3", zone: "Medical District", tier: 1, deadline: 1.0, weight: 6, value: 140 },
       { id: "P004", customer: "Metro Legal Associates", dest: "C2", zone: "Civic Center", tier: 1, deadline: 1.5, weight: 2, value: 85 },
@@ -343,7 +1952,48 @@
       { id: "P015", customer: "EcoHome Appliances", dest: "C10", zone: "Greenfield Suburb", tier: 3, deadline: 14.0, weight: 10, value: 75 }
     ];
 
-    // All-Pairs Dijkstra shortest-path distance matrix (km) across city graph
+    // City Graph Node Coordinates (km) from datasets/graph_nodes.csv
+    const GRAPH_NODES = {
+      HUB: { id: "HUB", name: "Central Dispatch Hub", type: "Depot", x: 10.0, y: 10.0 },
+      C1:  { id: "C1",  name: "Downtown Market", type: "Commercial", x: 12.5, y: 14.0 },
+      C2:  { id: "C2",  name: "Civic Center", type: "Business", x: 8.0, y: 15.5 },
+      C3:  { id: "C3",  name: "Medical District", type: "Healthcare", x: 5.0, y: 12.0 },
+      C4:  { id: "C4",  name: "Westside Mall", type: "Retail", x: 3.0, y: 7.5 },
+      C5:  { id: "C5",  name: "Waterfront Plaza", type: "Commercial", x: 6.5, y: 3.5 },
+      C6:  { id: "C6",  name: "University Campus", type: "Academic", x: 11.5, y: 5.0 },
+      C7:  { id: "C7",  name: "IT Corridor", type: "Tech Park", x: 17.0, y: 6.5 },
+      C8:  { id: "C8",  name: "Industrial Park", type: "Industrial", x: 18.5, y: 11.5 },
+      C9:  { id: "C9",  name: "Uptown Boulevard", type: "Luxury Retail", x: 15.5, y: 16.5 },
+      C10: { id: "C10", name: "Greenfield Suburb", type: "Residential", x: 4.0, y: 17.5 }
+    };
+
+    // 22 Weighted City Road Network Edges from datasets/graph_edges.csv
+    const GRAPH_EDGES = [
+      { source: "HUB", target: "C1", dist: 4.8, road: "Central Ave North" },
+      { source: "HUB", target: "C2", dist: 6.2, road: "Civic Expressway" },
+      { source: "HUB", target: "C3", dist: 5.5, road: "Hospital Arterial" },
+      { source: "HUB", target: "C6", dist: 5.3, road: "Campus Link Rd" },
+      { source: "HUB", target: "C8", dist: 8.8, road: "East Ring Corridor" },
+      { source: "C1", target: "C2", dist: 4.9, road: "Midtown Connector" },
+      { source: "C1", target: "C8", dist: 6.7, road: "Commerce Crossway" },
+      { source: "C1", target: "C9", dist: 4.2, road: "Uptown Parkway" },
+      { source: "C2", target: "C3", dist: 4.7, road: "West Civic Blvd" },
+      { source: "C2", target: "C9", dist: 7.8, road: "North Ridge Ave" },
+      { source: "C2", target: "C10", dist: 4.6, road: "Suburban Way" },
+      { source: "C3", target: "C4", dist: 5.1, road: "Westside Arterial" },
+      { source: "C3", target: "C5", dist: 8.9, road: "Riverfront Bypass" },
+      { source: "C3", target: "C10", dist: 5.7, road: "Northwest Link" },
+      { source: "C4", target: "C5", dist: 5.4, road: "Harbor Connector" },
+      { source: "C5", target: "C6", dist: 5.3, road: "South Bay Rd" },
+      { source: "C6", target: "C7", dist: 5.8, road: "Tech Valley Hwy" },
+      { source: "C6", target: "C8", dist: 9.5, road: "Old Industrial Rd" },
+      { source: "C7", target: "C8", dist: 5.3, road: "Innovation Drive" },
+      { source: "C8", target: "C9", dist: 6.0, road: "Northeast Beltway" },
+      { source: "C1", target: "C6", dist: 9.4, road: "Direct Meridian St" },
+      { source: "C4", target: "C6", dist: 9.1, road: "Cross-Town Blvd" }
+    ];
+
+    // All-Pairs Dijkstra Shortest-Path Distance Matrix (km)
     const DIST_MATRIX = {
       HUB: { HUB: 0, C1: 4.8, C2: 6.2, C3: 5.5, C4: 10.6, C5: 10.6, C6: 5.3, C7: 11.1, C8: 8.8, C9: 9.0, C10: 10.8 },
       C1:  { HUB: 4.8, C1: 0, C2: 4.9, C3: 9.6, C4: 14.7, C5: 14.7, C6: 9.4, C7: 12.0, C8: 6.7, C9: 4.2, C10: 9.5 },
@@ -358,6 +2008,34 @@
       C10: { HUB: 10.8, C1: 9.5, C2: 4.6, C3: 5.7, C4: 10.8, C5: 14.6, C6: 16.1, C7: 21.5, C8: 16.2, C9: 12.4, C10: 0 }
     };
 
+    // All-Pairs Dijkstra Physical Shortest-Path Node Sequences
+    const PATH_MATRIX = {
+      "HUB": {"HUB":["HUB"],"C1":["HUB","C1"],"C2":["HUB","C2"],"C3":["HUB","C3"],"C4":["HUB","C3","C4"],"C5":["HUB","C6","C5"],"C6":["HUB","C6"],"C7":["HUB","C6","C7"],"C8":["HUB","C8"],"C9":["HUB","C1","C9"],"C10":["HUB","C2","C10"]},
+      "C1": {"HUB":["C1","HUB"],"C1":["C1"],"C2":["C1","C2"],"C3":["C1","C2","C3"],"C4":["C1","C2","C3","C4"],"C5":["C1","C6","C5"],"C6":["C1","C6"],"C7":["C1","C8","C7"],"C8":["C1","C8"],"C9":["C1","C9"],"C10":["C1","C2","C10"]},
+      "C2": {"HUB":["C2","HUB"],"C1":["C2","C1"],"C2":["C2"],"C3":["C2","C3"],"C4":["C2","C3","C4"],"C5":["C2","C3","C5"],"C6":["C2","HUB","C6"],"C7":["C2","C1","C8","C7"],"C8":["C2","C1","C8"],"C9":["C2","C9"],"C10":["C2","C10"]},
+      "C3": {"HUB":["C3","HUB"],"C1":["C3","C2","C1"],"C2":["C3","C2"],"C3":["C3"],"C4":["C3","C4"],"C5":["C3","C5"],"C6":["C3","HUB","C6"],"C7":["C3","HUB","C6","C7"],"C8":["C3","HUB","C8"],"C9":["C3","C2","C9"],"C10":["C3","C10"]},
+      "C4": {"HUB":["C4","C3","HUB"],"C1":["C4","C3","C2","C1"],"C2":["C4","C3","C2"],"C3":["C4","C3"],"C4":["C4"],"C5":["C4","C5"],"C6":["C4","C6"],"C7":["C4","C6","C7"],"C8":["C4","C6","C8"],"C9":["C4","C3","C2","C9"],"C10":["C4","C3","C10"]},
+      "C5": {"HUB":["C5","C6","HUB"],"C1":["C5","C6","C1"],"C2":["C5","C3","C2"],"C3":["C5","C3"],"C4":["C5","C4"],"C5":["C5"],"C6":["C5","C6"],"C7":["C5","C6","C7"],"C8":["C5","C6","C8"],"C9":["C5","C6","C1","C9"],"C10":["C5","C3","C10"]},
+      "C6": {"HUB":["C6","HUB"],"C1":["C6","C1"],"C2":["C6","HUB","C2"],"C3":["C6","HUB","C3"],"C4":["C6","C4"],"C5":["C6","C5"],"C6":["C6"],"C7":["C6","C7"],"C8":["C6","C8"],"C9":["C6","C1","C9"],"C10":["C6","HUB","C2","C10"]},
+      "C7": {"HUB":["C7","C6","HUB"],"C1":["C7","C8","C1"],"C2":["C7","C8","C1","C2"],"C3":["C7","C6","HUB","C3"],"C4":["C7","C6","C4"],"C5":["C7","C6","C5"],"C6":["C7","C6"],"C7":["C7"],"C8":["C7","C8"],"C9":["C7","C8","C9"],"C10":["C7","C8","C1","C2","C10"]},
+      "C8": {"HUB":["C8","HUB"],"C1":["C8","C1"],"C2":["C8","C1","C2"],"C3":["C8","HUB","C3"],"C4":["C8","C6","C4"],"C5":["C8","C6","C5"],"C6":["C8","C6"],"C7":["C8","C7"],"C8":["C8"],"C9":["C8","C9"],"C10":["C8","C1","C2","C10"]},
+      "C9": {"HUB":["C9","C1","HUB"],"C1":["C9","C1"],"C2":["C9","C2"],"C3":["C9","C2","C3"],"C4":["C9","C2","C3","C4"],"C5":["C9","C1","C6","C5"],"C6":["C9","C1","C6"],"C7":["C9","C8","C7"],"C8":["C9","C8"],"C9":["C9"],"C10":["C9","C2","C10"]},
+      "C10": {"HUB":["C10","C2","HUB"],"C1":["C10","C2","C1"],"C2":["C10","C2"],"C3":["C10","C3"],"C4":["C10","C3","C4"],"C5":["C10","C3","C5"],"C6":["C10","C2","HUB","C6"],"C7":["C10","C2","C1","C8","C7"],"C8":["C10","C2","C1","C8"],"C9":["C10","C2","C9"],"C10":["C10"]}
+    };
+
+    // Lookup table for road names
+    const ROAD_NAMES = {};
+    for (const edge of GRAPH_EDGES) {
+      ROAD_NAMES[`${edge.source}->${edge.target}`] = edge.road;
+      ROAD_NAMES[`${edge.target}->${edge.source}`] = edge.road;
+    }
+    function getRoadName(u, v) {
+      return ROAD_NAMES[`${u}->${v}`] || `${u} ➔ ${v} Connector`;
+    }
+
+    /* -------------------------------------------------------------------------
+       LOGIC: 0/1 KNAPSACK DYNAMIC PROGRAMMING
+       ------------------------------------------------------------------------- */
     function solveKnapsackDP(capacity) {
       const n = SORTED_PARCELS.length;
       const dp = Array.from({ length: n + 1 }, () => new Array(capacity + 1).fill(0));
@@ -373,16 +2051,53 @@
         }
       }
       const selectedSet = new Set();
+      const optimalPathCells = new Set();
       let remW = capacity;
       for (let i = n; i >= 1; i--) {
         if (dp[i][remW] !== dp[i - 1][remW]) {
           selectedSet.add(SORTED_PARCELS[i - 1].id);
+          optimalPathCells.add(`${i},${remW}`);
           remW -= SORTED_PARCELS[i - 1].weight;
         }
       }
-      return { maxVal: dp[n][capacity], packedWeight: capacity - remW, selectedSet };
+      return { 
+        maxVal: dp[n][capacity], 
+        packedWeight: capacity - remW, 
+        selectedSet, 
+        dpTable: dp, 
+        optimalPathCells 
+      };
     }
 
+    /* -------------------------------------------------------------------------
+       LOGIC: GREEDY VALUE-DENSITY HEURISTIC (FOR COMPARATIVE PROOF)
+       ------------------------------------------------------------------------- */
+    function solveKnapsackGreedy(capacity) {
+      const ranked = [...SORTED_PARCELS]
+        .map((p, idx) => ({ ...p, origIdx: idx, density: p.value / p.weight }))
+        .sort((a, b) => {
+          if (b.density !== a.density) return b.density - a.density;
+          if (a.tier !== b.tier) return a.tier - b.tier;
+          return a.deadline - b.deadline;
+        });
+
+      const selectedSet = new Set();
+      let packedWeight = 0;
+      let maxVal = 0;
+
+      for (const p of ranked) {
+        if (packedWeight + p.weight <= capacity) {
+          selectedSet.add(p.id);
+          packedWeight += p.weight;
+          maxVal += p.value;
+        }
+      }
+      return { maxVal, packedWeight, selectedSet };
+    }
+
+    /* -------------------------------------------------------------------------
+       LOGIC: NEAREST-NEIGHBOR TSP APPROXIMATION
+       ------------------------------------------------------------------------- */
     function solveNearestNeighborTSP(selectedSet) {
       const stops = [];
       const seen = new Set(["HUB"]);
@@ -396,6 +2111,7 @@
       let curr = "HUB";
       const tour = ["HUB"];
       let totalDist = 0;
+
       while (unvisited.size > 0) {
         let bestNext = null;
         let bestDist = Infinity;
@@ -413,53 +2129,656 @@
       }
       totalDist += DIST_MATRIX[curr]["HUB"];
       tour.push("HUB");
-      return { tour, totalDist };
+      return { tour, totalDist: Math.round(totalDist * 100) / 100 };
     }
 
-    function updateSimulator() {
-      const cap = parseInt(document.getElementById("cap-slider").value, 10);
-      document.getElementById("cap-display").textContent = `${cap} kg`;
+    /* -------------------------------------------------------------------------
+       LOGIC: 2-OPT LOCAL SEARCH REFINEMENT
+       ------------------------------------------------------------------------- */
+    function calculateTourDistance(tour) {
+      let d = 0;
+      for (let i = 0; i < tour.length - 1; i++) {
+        d += DIST_MATRIX[tour[i]][tour[i + 1]];
+      }
+      return Math.round(d * 100) / 100;
+    }
 
-      const { maxVal, packedWeight, selectedSet } = solveKnapsackDP(cap);
-      const { tour, totalDist } = solveNearestNeighborTSP(selectedSet);
-      const util = ((packedWeight / cap) * 100).toFixed(1);
+    function solveTwoOptTSP(initialTour) {
+      let bestTour = [...initialTour];
+      let bestDist = calculateTourDistance(bestTour);
+      let improved = true;
+      const n = bestTour.length;
 
+      while (improved) {
+        improved = false;
+        for (let i = 1; i < n - 2; i++) {
+          for (let j = i + 1; j < n - 1; j++) {
+            const u1 = bestTour[i - 1], u2 = bestTour[i];
+            const v1 = bestTour[j], v2 = bestTour[j + 1];
+            const oldCost = DIST_MATRIX[u1][u2] + DIST_MATRIX[v1][v2];
+            const newCost = DIST_MATRIX[u1][v1] + DIST_MATRIX[u2][v2];
+            if (newCost < oldCost - 1e-6) {
+              const reversedSegment = bestTour.slice(i, j + 1).reverse();
+              bestTour = [...bestTour.slice(0, i), ...reversedSegment, ...bestTour.slice(j + 1)];
+              bestDist = calculateTourDistance(bestTour);
+              improved = true;
+              break;
+            }
+          }
+          if (improved) break;
+        }
+      }
+      return { tour: bestTour, totalDist: bestDist };
+    }
+
+    /* =========================================================================
+       UI STATE & EVENT CONTROLLERS
+       ========================================================================= */
+    let currentCapacity = 30;
+    let currentPackingAlgo = "DP"; // "DP" or "GREEDY"
+    let currentRouteMethod = "NN"; // "NN" or "2OPT"
+    let currentFilter = "ALL";
+    let searchQuery = "";
+    let sortColumn = "rank";
+    let sortDirection = 1; // 1 = asc, -1 = desc
+    let activePhaseTab = 1;
+
+    // Coordinate mapping functions for SVG (Euclidean X/Y to SVG X/Y)
+    // X range: 3.0 to 18.5 km (span 15.5) -> SVG viewBox: 0 0 760 520
+    // Y range: 3.5 to 17.5 km (span 14.0)
+    function mapX(x) {
+      const margin = 70;
+      const width = 760 - 2 * margin;
+      return margin + ((x - 2.8) / (19.0 - 2.8)) * width;
+    }
+    function mapY(y) {
+      const margin = 55;
+      const height = 520 - 2 * margin;
+      // Invert Y so higher km is toward the top
+      return 520 - (margin + ((y - 2.8) / (18.2 - 2.8)) * height);
+    }
+
+    function initSVGNetwork() {
+      const edgesLayer = document.getElementById("svg-edges-layer");
+      edgesLayer.innerHTML = "";
+
+      // Draw all 22 base road network edges
+      for (const edge of GRAPH_EDGES) {
+        const u = GRAPH_NODES[edge.source];
+        const v = GRAPH_NODES[edge.target];
+        const x1 = mapX(u.x), y1 = mapY(u.y);
+        const x2 = mapX(v.x), y2 = mapY(v.y);
+
+        const line = document.createElementNS("http://www.w3.org/2000/svg", "line");
+        line.setAttribute("x1", x1);
+        line.setAttribute("y1", y1);
+        line.setAttribute("x2", x2);
+        line.setAttribute("y2", y2);
+        line.setAttribute("stroke", "#22314e");
+        line.setAttribute("stroke-width", "2");
+        line.setAttribute("stroke-dasharray", "4,4");
+        edgesLayer.appendChild(line);
+
+        // Edge label (distance in km)
+        const midX = (x1 + x2) / 2;
+        const midY = (y1 + y2) / 2;
+        const txt = document.createElementNS("http://www.w3.org/2000/svg", "text");
+        txt.setAttribute("x", midX);
+        txt.setAttribute("y", midY - 3);
+        txt.setAttribute("fill", "#64748b");
+        txt.setAttribute("font-size", "10");
+        txt.setAttribute("text-anchor", "middle");
+        txt.setAttribute("font-family", "ui-monospace, monospace");
+        txt.textContent = `${edge.dist}k`;
+        edgesLayer.appendChild(txt);
+      }
+    }
+
+    function renderSVGTour(tour, activeStopsSet, parcelsByStop) {
+      const tourLayer = document.getElementById("svg-tour-layer");
+      const nodesLayer = document.getElementById("svg-nodes-layer");
+      tourLayer.innerHTML = "";
+      nodesLayer.innerHTML = "";
+
+      // Draw TSP Tour Directed Polyline
+      for (let i = 0; i < tour.length - 1; i++) {
+        const u = GRAPH_NODES[tour[i]];
+        const v = GRAPH_NODES[tour[i + 1]];
+        const x1 = mapX(u.x), y1 = mapY(u.y);
+        const x2 = mapX(v.x), y2 = mapY(v.y);
+
+        const tourLine = document.createElementNS("http://www.w3.org/2000/svg", "line");
+        tourLine.setAttribute("x1", x1);
+        tourLine.setAttribute("y1", y1);
+        tourLine.setAttribute("x2", x2);
+        tourLine.setAttribute("y2", y2);
+        tourLine.setAttribute("stroke", "#38bdf8");
+        tourLine.setAttribute("stroke-width", "3.5");
+        tourLine.setAttribute("stroke-linecap", "round");
+        tourLine.setAttribute("marker-end", "url(#tour-arrowhead)");
+        tourLine.setAttribute("filter", "url(#neon-glow)");
+        tourLayer.appendChild(tourLine);
+      }
+
+      // Draw Nodes
+      for (const [nodeId, node] of Object.entries(GRAPH_NODES)) {
+        const nx = mapX(node.x);
+        const ny = mapY(node.y);
+        const isActive = activeStopsSet.has(nodeId);
+        const isHub = nodeId === "HUB";
+        const dropCount = parcelsByStop[nodeId] ? parcelsByStop[nodeId].length : 0;
+
+        const g = document.createElementNS("http://www.w3.org/2000/svg", "g");
+        g.style.cursor = "pointer";
+
+        if (isHub) {
+          // Central Depot Node (Golden Diamond)
+          const rect = document.createElementNS("http://www.w3.org/2000/svg", "rect");
+          rect.setAttribute("x", nx - 12);
+          rect.setAttribute("y", ny - 12);
+          rect.setAttribute("width", "24");
+          rect.setAttribute("height", "24");
+          rect.setAttribute("transform", `rotate(45 ${nx} ${ny})`);
+          rect.setAttribute("fill", "#f59e0b");
+          rect.setAttribute("stroke", "#ffffff");
+          rect.setAttribute("stroke-width", "2");
+          rect.setAttribute("filter", "url(#neon-glow)");
+          g.appendChild(rect);
+
+          const lbl = document.createElementNS("http://www.w3.org/2000/svg", "text");
+          lbl.setAttribute("x", nx);
+          lbl.setAttribute("y", ny - 20);
+          lbl.setAttribute("fill", "#fbbf24");
+          lbl.setAttribute("font-size", "12");
+          lbl.setAttribute("font-weight", "800");
+          lbl.setAttribute("text-anchor", "middle");
+          lbl.textContent = "HUB (Depot)";
+          g.appendChild(lbl);
+        } else {
+          // Customer Node
+          const circle = document.createElementNS("http://www.w3.org/2000/svg", "circle");
+          circle.setAttribute("cx", nx);
+          circle.setAttribute("cy", ny);
+          circle.setAttribute("r", isActive ? "13" : "9");
+          circle.setAttribute("fill", isActive ? "#10b981" : "#334155");
+          circle.setAttribute("stroke", isActive ? "#ffffff" : "#1e293b");
+          circle.setAttribute("stroke-width", isActive ? "2.5" : "1.5");
+          if (isActive) circle.setAttribute("filter", "url(#neon-glow)");
+          g.appendChild(circle);
+
+          // Node ID inside circle
+          const idTxt = document.createElementNS("http://www.w3.org/2000/svg", "text");
+          idTxt.setAttribute("x", nx);
+          idTxt.setAttribute("y", ny + (isActive ? 4 : 3));
+          idTxt.setAttribute("fill", isActive ? "#000000" : "#94a3b8");
+          idTxt.setAttribute("font-size", isActive ? "10" : "8");
+          idTxt.setAttribute("font-weight", "800");
+          idTxt.setAttribute("text-anchor", "middle");
+          idTxt.textContent = nodeId;
+          g.appendChild(idTxt);
+
+          // Zone name label
+          const nameTxt = document.createElementNS("http://www.w3.org/2000/svg", "text");
+          nameTxt.setAttribute("x", nx);
+          nameTxt.setAttribute("y", ny + (isActive ? 25 : 20));
+          nameTxt.setAttribute("fill", isActive ? "#e2e8f0" : "#64748b");
+          nameTxt.setAttribute("font-size", "10");
+          nameTxt.setAttribute("font-weight", isActive ? "700" : "500");
+          nameTxt.setAttribute("text-anchor", "middle");
+          nameTxt.textContent = node.name;
+          g.appendChild(nameTxt);
+
+          // Drop-off badge if packages destined here
+          if (dropCount > 0) {
+            const badge = document.createElementNS("http://www.w3.org/2000/svg", "circle");
+            badge.setAttribute("cx", nx + 10);
+            badge.setAttribute("cy", ny - 10);
+            badge.setAttribute("r", "7");
+            badge.setAttribute("fill", "#0284c7");
+            badge.setAttribute("stroke", "#ffffff");
+            badge.setAttribute("stroke-width", "1");
+            g.appendChild(badge);
+
+            const badgeTxt = document.createElementNS("http://www.w3.org/2000/svg", "text");
+            badgeTxt.setAttribute("x", nx + 10);
+            badgeTxt.setAttribute("y", ny - 7);
+            badgeTxt.setAttribute("fill", "#ffffff");
+            badgeTxt.setAttribute("font-size", "8");
+            badgeTxt.setAttribute("font-weight", "bold");
+            badgeTxt.setAttribute("text-anchor", "middle");
+            badgeTxt.textContent = dropCount;
+            g.appendChild(badgeTxt);
+          }
+        }
+
+        // Hover tooltip on node
+        g.addEventListener("mouseenter", () => {
+          const drops = parcelsByStop[nodeId] ? parcelsByStop[nodeId].map(p => p.id).join(", ") : "None";
+          showToast(`📍 ${nodeId}: ${node.name} (${node.type}) | Drop-offs: ${drops}`);
+        });
+
+        nodesLayer.appendChild(g);
+      }
+    }
+
+    /* -------------------------------------------------------------------------
+       MAIN RE-COMPUTE & DOM REFRESH FUNCTION
+       ------------------------------------------------------------------------- */
+    function updateDashboard() {
+      // 1. Solve Packing based on active algorithm
+      const dpSol = solveKnapsackDP(currentCapacity);
+      const greedySol = solveKnapsackGreedy(currentCapacity);
+
+      const activePacking = currentPackingAlgo === "DP" ? dpSol : greedySol;
+      const { maxVal, packedWeight, selectedSet } = activePacking;
+
+      // 2. Solve Routing
+      const nnSol = solveNearestNeighborTSP(selectedSet);
+      let activeTour = nnSol.tour;
+      let activeDist = nnSol.totalDist;
+
+      if (currentRouteMethod === "2OPT") {
+        const optSol = solveTwoOptTSP(nnSol.tour);
+        activeTour = optSol.tour;
+        activeDist = optSol.totalDist;
+      }
+
+      // Group active packages by destination stop
+      const parcelsByStop = {};
+      let criticalFulfilledCount = 0;
+      for (const p of SORTED_PARCELS) {
+        if (selectedSet.has(p.id)) {
+          if (!parcelsByStop[p.dest]) parcelsByStop[p.dest] = [];
+          parcelsByStop[p.dest].push(p);
+          if (p.tier === 1) criticalFulfilledCount++;
+        }
+      }
+
+      const activeStopsSet = new Set(Object.keys(parcelsByStop));
+      const utilPct = ((packedWeight / currentCapacity) * 100).toFixed(1);
+
+      // 3. Update Top KPIs
       document.getElementById("kpi-dp-val").textContent = `${maxVal} pts`;
-      document.getElementById("kpi-dp-sub").textContent = `${packedWeight} / ${cap} kg (${util}% Util) | ${selectedSet.size} Parcels Packed`;
-      document.getElementById("kpi-route-dist").textContent = `${totalDist.toFixed(2)} km`;
+      document.getElementById("kpi-dp-sub").innerHTML = `<strong>${packedWeight} / ${currentCapacity} kg packed</strong> | +${Math.max(0, dpSol.maxVal - greedySol.maxVal)} pts vs Greedy`;
+      document.getElementById("kpi-util-badge").textContent = `${utilPct}% Util`;
+      document.getElementById("kpi-route-dist").textContent = `${activeDist.toFixed(2)} km`;
+      document.getElementById("kpi-route-badge").textContent = currentRouteMethod === "2OPT" ? "2-Opt Refined" : "NN TSP";
+      document.getElementById("kpi-route-sub").innerHTML = `<strong>${activeTour.length - 2} Customer Stops</strong> | Round-trip loop`;
+      document.getElementById("kpi-sla-val").textContent = `${criticalFulfilledCount}/7 (${Math.round((criticalFulfilledCount / 7) * 100)}%)`;
 
-      document.getElementById("sim-summary").innerHTML =
-        `<strong>0/1 DP Optimal Value:</strong> ${maxVal} pts &nbsp;|&nbsp; <strong>Packed Weight:</strong> ${packedWeight}/${cap} kg (${util}%) &nbsp;|&nbsp; <strong>Selected Parcels:</strong> ${selectedSet.size}/15`;
+      // 4. Update Van Status HUD
+      document.getElementById("cap-display").textContent = `${currentCapacity} kg`;
+      document.getElementById("stat-weight").textContent = `${packedWeight} / ${currentCapacity} kg`;
+      document.getElementById("stat-util-pct").textContent = `(${utilPct}%)`;
+      document.getElementById("stat-progress-bar").style.width = `${Math.min(100, utilPct)}%`;
+      document.getElementById("stat-progress-bar").className = `progress-bar-fill ${utilPct >= 95 ? 'fill-emerald' : 'fill-amber'}`;
+      document.getElementById("stat-value").textContent = `${maxVal} pts`;
+      document.getElementById("stat-count").textContent = `${selectedSet.size} of 15 Parcels`;
+      document.getElementById("stat-dist").textContent = `${activeDist.toFixed(2)} km`;
+      document.getElementById("stat-stops").textContent = `${activeTour.length - 2} Stops + Hub`;
+      document.getElementById("stat-est-time").textContent = `~${(activeDist / 35).toFixed(1)} hrs`;
+      document.getElementById("stat-dp-note").textContent = currentPackingAlgo === "DP" 
+        ? "Guaranteed global optimal packing" 
+        : "Greedy heuristic (density sorted)";
 
-      document.getElementById("live-route-box").innerHTML =
-        `<strong>Active Nearest-Neighbor TSP Delivery Route (${tour.length - 2} Stops, Total = ${totalDist.toFixed(2)} km):</strong><br/>` +
-        tour.join(" &rarr; ");
+      // 5. Update Breadcrumb Strip
+      const breadcrumbsContainer = document.getElementById("live-route-breadcrumbs");
+      breadcrumbsContainer.innerHTML = "";
+      activeTour.forEach((stop, idx) => {
+        const isHub = stop === "HUB";
+        const nodeSpan = document.createElement("span");
+        nodeSpan.className = `tour-stop-node ${isHub ? 'hub' : ''}`;
+        nodeSpan.innerHTML = isHub ? `⭐ HUB` : `<strong>${stop}</strong> (${parcelsByStop[stop] ? parcelsByStop[stop].length : 0}pk)`;
+        breadcrumbsContainer.appendChild(nodeSpan);
 
+        if (idx < activeTour.length - 1) {
+          const arrow = document.createElement("span");
+          arrow.className = "tour-arrow";
+          arrow.innerHTML = "&rarr;";
+          breadcrumbsContainer.appendChild(arrow);
+        }
+      });
+      document.getElementById("route-card-title").textContent = 
+        `Active ${currentRouteMethod === '2OPT' ? '2-Opt Refined' : 'Nearest-Neighbor'} Delivery Sequence (${activeTour.length - 2} Stops, Total = ${activeDist.toFixed(2)} km):`;
+
+      // 6. Update Itinerary List
+      const legsContainer = document.getElementById("legs-container");
+      legsContainer.innerHTML = "";
+      let cumDist = 0;
+      for (let i = 0; i < activeTour.length - 1; i++) {
+        const u = activeTour[i];
+        const v = activeTour[i + 1];
+        const legDist = DIST_MATRIX[u][v];
+        cumDist += legDist;
+        const road = getRoadName(u, v);
+        const drops = parcelsByStop[v] ? parcelsByStop[v].map(p => `${p.id} (${p.weight}kg)`).join(", ") : "Return to Hub";
+
+        const legDiv = document.createElement("div");
+        legDiv.className = "leg-item";
+        legDiv.innerHTML = `
+          <div class="leg-top">
+            <span class="leg-nodes">Leg ${i + 1}: ${u} ➔ ${v}</span>
+            <span class="leg-dist">${legDist.toFixed(1)} km</span>
+          </div>
+          <div class="leg-road">🛣️ Road: <strong>${road}</strong> | Cumul: ${cumDist.toFixed(1)} km</div>
+          <div class="leg-drops">📦 ${v === 'HUB' ? '🏁 Shift Complete' : 'Drop-off: ' + drops}</div>
+        `;
+        legsContainer.appendChild(legDiv);
+      }
+      document.getElementById("itinerary-total-dist").textContent = `${activeDist.toFixed(2)} km total`;
+
+      // 7. Update Showdown Matrix
+      document.getElementById("showdown-dp-val").textContent = `${dpSol.maxVal} pts`;
+      document.getElementById("showdown-dp-detail").textContent = `Capacity: ${dpSol.packedWeight} / ${currentCapacity} kg (${((dpSol.packedWeight / currentCapacity) * 100).toFixed(1)}%) | ${dpSol.selectedSet.size} Parcels`;
+      document.getElementById("showdown-greedy-val").textContent = `${greedySol.maxVal} pts`;
+      document.getElementById("showdown-greedy-detail").textContent = `Capacity: ${greedySol.packedWeight} / ${currentCapacity} kg (${((greedySol.packedWeight / currentCapacity) * 100).toFixed(1)}%) | ${greedySol.selectedSet.size} Parcels`;
+      
+      const valDelta = dpSol.maxVal - greedySol.maxVal;
+      const utilDelta = (((dpSol.packedWeight - greedySol.packedWeight) / currentCapacity) * 100).toFixed(1);
+      document.getElementById("showdown-delta").textContent = `+${valDelta} pts`;
+      document.getElementById("showdown-util-gap").textContent = `+${utilDelta}% Higher Capacity Fill`;
+
+      // 8. Render SVG Map
+      renderSVGTour(activeTour, activeStopsSet, parcelsByStop);
+
+      // 9. Render Parcel Manifest Table
+      renderParcelTable(selectedSet);
+
+      // 10. Update Live DP Matrix if open
+      if (document.getElementById("dp-table-wrap")?.classList.contains("open")) {
+        renderDPMatrix(dpSol);
+      }
+    }
+
+    /* -------------------------------------------------------------------------
+       PARCEL MANIFEST TABLE FILTERING & SORTING
+       ------------------------------------------------------------------------- */
+    function renderParcelTable(selectedSet) {
       const tbody = document.getElementById("parcel-tbody");
       tbody.innerHTML = "";
-      SORTED_PARCELS.forEach((p, idx) => {
-        const isPacked = selectedSet.has(p.id);
-        const tierLabel = p.tier === 1 ? "CRITICAL (T1)" : p.tier === 2 ? "STANDARD (T2)" : "ECONOMY (T3)";
+
+      // Apply Filters
+      let filtered = SORTED_PARCELS.map((p, idx) => ({
+        ...p,
+        rank: idx + 1,
+        isPacked: selectedSet.has(p.id),
+        density: p.value / p.weight
+      })).filter(p => {
+        if (currentFilter === "T1" && p.tier !== 1) return false;
+        if (currentFilter === "T2" && p.tier !== 2) return false;
+        if (currentFilter === "T3" && p.tier !== 3) return false;
+        if (currentFilter === "PACKED" && !p.isPacked) return false;
+        if (currentFilter === "DEFERRED" && p.isPacked) return false;
+
+        if (searchQuery) {
+          const q = searchQuery.toLowerCase();
+          return p.id.toLowerCase().includes(q) || 
+                 p.customer.toLowerCase().includes(q) || 
+                 p.zone.toLowerCase().includes(q) ||
+                 p.dest.toLowerCase().includes(q);
+        }
+        return true;
+      });
+
+      // Apply Sorting
+      filtered.sort((a, b) => {
+        let valA = a[sortColumn];
+        let valB = b[sortColumn];
+        if (typeof valA === "string") valA = valA.toLowerCase();
+        if (typeof valB === "string") valB = valB.toLowerCase();
+        if (valA < valB) return -1 * sortDirection;
+        if (valA > valB) return 1 * sortDirection;
+        return 0;
+      });
+
+      filtered.forEach(p => {
         const tr = document.createElement("tr");
-        if (isPacked) tr.className = "packed-row";
+        if (p.isPacked) tr.className = "packed-row";
+
+        const tierLabel = p.tier === 1 ? "CRITICAL (T1)" : p.tier === 2 ? "STANDARD (T2)" : "ECONOMY (T3)";
+        const tierClass = `tier-${p.tier}`;
+
         tr.innerHTML = `
-          <td><strong>#${idx + 1}</strong></td>
-          <td><code>${p.id}</code></td>
-          <td>${p.customer}</td>
-          <td><strong>${p.dest}</strong> (${p.zone})</td>
-          <td class="tier-${p.tier}">${tierLabel}</td>
+          <td><strong>#${p.rank}</strong></td>
+          <td><code style="font-family: var(--font-mono); color: var(--accent-cyan); font-weight: bold;">${p.id}</code></td>
+          <td><strong>${p.customer}</strong></td>
+          <td><span style="font-weight: 700; color: #fff;">${p.dest}</span> <span style="color: var(--text-muted); font-size: 11px;">(${p.zone})</span></td>
+          <td><span class="tier-badge ${tierClass}">${tierLabel}</span></td>
           <td>${p.deadline.toFixed(1)} hrs</td>
-          <td>${p.weight} kg</td>
-          <td><strong>${p.value}</strong></td>
-          <td>${(p.value / p.weight).toFixed(2)}</td>
-          <td><span class="status-pill ${isPacked ? 'status-packed' : 'status-deferred'}">${isPacked ? 'PACKED IN VAN' : 'DEFERRED'}</span></td>
+          <td>
+            <div style="display: flex; align-items: center; gap: 8px;">
+              <span>${p.weight} kg</span>
+              <div style="width: 50px; height: 5px; background: #1e293b; border-radius: 3px; overflow: hidden;">
+                <div style="width: ${(p.weight / 11) * 100}%; height: 100%; background: var(--accent-cyan);"></div>
+              </div>
+            </div>
+          </td>
+          <td><strong style="color: #fff;">${p.value}</strong></td>
+          <td><code style="color: var(--accent-cyan);">${p.density.toFixed(2)}</code></td>
+          <td>
+            <span class="status-pill ${p.isPacked ? 'status-packed' : 'status-deferred'}">
+              ${p.isPacked ? '✓ PACKED IN VAN' : '⏳ DEFERRED'}
+            </span>
+          </td>
         `;
         tbody.appendChild(tr);
       });
     }
 
-    document.getElementById("cap-slider").addEventListener("input", updateSimulator);
-    updateSimulator();
+    function sortManifestBy(col) {
+      if (sortColumn === col) {
+        sortDirection *= -1;
+      } else {
+        sortColumn = col;
+        sortDirection = 1;
+      }
+      const dpSol = solveKnapsackDP(currentCapacity);
+      renderParcelTable(dpSol.selectedSet);
+    }
+
+    function setParcelFilter(filter) {
+      currentFilter = filter;
+      document.querySelectorAll(".filter-tab").forEach(tab => tab.classList.remove("active"));
+      event.target.classList.add("active");
+      const dpSol = solveKnapsackDP(currentCapacity);
+      renderParcelTable(dpSol.selectedSet);
+    }
+
+    function handleSearch(val) {
+      searchQuery = val.trim();
+      const dpSol = solveKnapsackDP(currentCapacity);
+      renderParcelTable(dpSol.selectedSet);
+    }
+
+    /* -------------------------------------------------------------------------
+       2D DP TABLE VISUALIZER
+       ------------------------------------------------------------------------- */
+    function toggleDPTable() {
+      const wrap = document.getElementById("dp-table-container");
+      const icon = document.getElementById("dp-collapse-icon");
+      wrap.classList.toggle("open");
+      if (wrap.classList.contains("open")) {
+        icon.textContent = "▼ Click to Collapse Matrix";
+        const dpSol = solveKnapsackDP(currentCapacity);
+        renderDPMatrix(dpSol);
+      } else {
+        icon.textContent = "▶ Click to Expand Matrix (15 × W)";
+      }
+    }
+
+    function renderDPMatrix(dpSol) {
+      const table = document.getElementById("dp-live-table");
+      table.innerHTML = "";
+      const W = currentCapacity;
+      const dp = dpSol.dpTable;
+
+      // Table Header: Capacities 0 to W
+      const thead = document.createElement("thead");
+      const hRow = document.createElement("tr");
+      hRow.innerHTML = "<th>Parcel</th><th>wt</th><th>val</th>";
+      for (let w = 0; w <= W; w++) {
+        hRow.innerHTML += `<th>${w}kg</th>`;
+      }
+      thead.appendChild(hRow);
+      table.appendChild(thead);
+
+      // Table Body: Rows 0 to 15
+      const tbody = document.createElement("tbody");
+      for (let i = 0; i <= SORTED_PARCELS.length; i++) {
+        const tr = document.createElement("tr");
+        if (i === 0) {
+          tr.innerHTML = `<td><code>[Base 0]</code></td><td>0</td><td>0</td>`;
+        } else {
+          const p = SORTED_PARCELS[i - 1];
+          tr.innerHTML = `<td><code>${p.id}</code></td><td>${p.weight}</td><td>${p.value}</td>`;
+        }
+        for (let w = 0; w <= W; w++) {
+          const isOptimalCell = dpSol.optimalPathCells.has(`${i},${w}`);
+          tr.innerHTML += `<td class="${isOptimalCell ? 'dp-cell-optimal' : ''}">${dp[i][w]}</td>`;
+        }
+        tbody.appendChild(tr);
+      }
+      table.appendChild(tbody);
+    }
+
+    /* -------------------------------------------------------------------------
+       INTERACTIVE VAN ANIMATION
+       ------------------------------------------------------------------------- */
+    let animationTimer = null;
+    function animateVanDelivery() {
+      const dpSol = solveKnapsackDP(currentCapacity);
+      const nnSol = solveNearestNeighborTSP(dpSol.selectedSet);
+      const tour = currentRouteMethod === "2OPT" ? solveTwoOptTSP(nnSol.tour).tour : nnSol.tour;
+
+      const van = document.getElementById("svg-van-marker");
+      van.style.display = "block";
+
+      if (animationTimer) clearInterval(animationTimer);
+
+      let step = 0;
+      showToast(`🚐 Van departed HUB on ${tour.length - 2} stop delivery tour!`);
+
+      function nextLeg() {
+        if (step >= tour.length) {
+          showToast("🏁 Van completed route and safely returned to HUB!");
+          van.style.display = "none";
+          return;
+        }
+        const currNode = GRAPH_NODES[tour[step]];
+        const nx = mapX(currNode.x);
+        const ny = mapY(currNode.y);
+        van.setAttribute("transform", `translate(${nx}, ${ny})`);
+
+        if (step > 0 && step < tour.length - 1) {
+          showToast(`📦 Arrived at Stop ${step}: ${currNode.name} (${currNode.id})`);
+        }
+        step++;
+        animationTimer = setTimeout(nextLeg, 1200);
+      }
+      nextLeg();
+    }
+
+    /* -------------------------------------------------------------------------
+       UI EVENT HANDLERS & HELPERS
+       ------------------------------------------------------------------------- */
+    function setCapacity(val) {
+      currentCapacity = parseInt(val, 10);
+      document.getElementById("cap-slider").value = currentCapacity;
+      document.querySelectorAll(".preset-btn").forEach(btn => btn.classList.remove("active"));
+      if (event && event.target.classList.contains("preset-btn")) {
+        event.target.classList.add("active");
+      }
+      updateDashboard();
+    }
+
+    function setPackingAlgo(algo) {
+      currentPackingAlgo = algo;
+      document.getElementById("btn-algo-dp").className = `seg-btn ${algo === 'DP' ? 'active dp' : ''}`;
+      document.getElementById("btn-algo-greedy").className = `seg-btn ${algo === 'GREEDY' ? 'active greedy' : ''}`;
+      updateDashboard();
+      showToast(algo === "DP" ? "Switched to 0/1 Knapsack DP (Optimal)" : "Switched to Greedy Value-Density Heuristic");
+    }
+
+    function setRouteMethod(method) {
+      currentRouteMethod = method;
+      document.getElementById("btn-route-nn").className = `seg-btn ${method === 'NN' ? 'active' : ''}`;
+      document.getElementById("btn-route-2opt").className = `seg-btn ${method === '2OPT' ? 'active' : ''}`;
+      updateDashboard();
+      showToast(method === "NN" ? "Routing: Nearest-Neighbor TSP" : "Routing: 2-Opt Local Search Refined");
+    }
+
+    function switchPhaseTab(phaseNum) {
+      activePhaseTab = phaseNum;
+      document.querySelectorAll(".phase-tab-btn").forEach((btn, idx) => {
+        btn.classList.toggle("active", idx + 1 === phaseNum);
+      });
+      document.querySelectorAll(".phase-pane").forEach((pane, idx) => {
+        pane.classList.toggle("active", idx + 1 === phaseNum);
+      });
+    }
+
+    function openModal(imgSrc, caption) {
+      const modal = document.getElementById("img-modal");
+      document.getElementById("modal-img-tag").src = imgSrc;
+      document.getElementById("modal-caption").textContent = caption;
+      modal.classList.add("open");
+    }
+
+    function closeModal() {
+      document.getElementById("img-modal").classList.remove("open");
+    }
+
+    function showToast(msg) {
+      const toast = document.getElementById("toast-msg");
+      toast.textContent = msg;
+      toast.classList.add("show");
+      setTimeout(() => toast.classList.remove("show"), 3200);
+    }
+
+    // Export Dispatch Plan to JSON
+    document.getElementById("btn-export-json").addEventListener("click", () => {
+      const dpSol = solveKnapsackDP(currentCapacity);
+      const nnSol = solveNearestNeighborTSP(dpSol.selectedSet);
+      const tourSol = currentRouteMethod === "2OPT" ? solveTwoOptTSP(nnSol.tour) : nnSol;
+
+      const exportData = {
+        capstone_system: "Mini-Courier Planner",
+        version: "v1.0-final-submission",
+        timestamp: new Date().toISOString(),
+        van_payload_capacity_kg: currentCapacity,
+        packing_algorithm: currentPackingAlgo === "DP" ? "0/1 Knapsack 2D Dynamic Programming" : "Greedy Density Heuristic",
+        routing_algorithm: currentRouteMethod === "2OPT" ? "Nearest-Neighbor TSP with 2-Opt Local Search" : "Nearest-Neighbor TSP",
+        total_value_score: dpSol.maxVal,
+        packed_weight_kg: dpSol.packedWeight,
+        capacity_utilization_pct: `${((dpSol.packedWeight / currentCapacity) * 100).toFixed(1)}%`,
+        route_sequence: tourSol.tour,
+        route_total_distance_km: tourSol.totalDist,
+        selected_parcels: SORTED_PARCELS.filter(p => dpSol.selectedSet.has(p.id)),
+        deferred_parcels: SORTED_PARCELS.filter(p => !dpSol.selectedSet.has(p.id))
+      };
+
+      const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(exportData, null, 2));
+      const dlAnchor = document.createElement("a");
+      dlAnchor.setAttribute("href", dataStr);
+      dlAnchor.setAttribute("download", `courier_dispatch_plan_${currentCapacity}kg.json`);
+      document.body.appendChild(dlAnchor);
+      dlAnchor.click();
+      dlAnchor.remove();
+      showToast("📥 Exported dispatch plan JSON successfully!");
+    });
+
+    // Slider listener
+    document.getElementById("cap-slider").addEventListener("input", (e) => {
+      currentCapacity = parseInt(e.target.value, 10);
+      document.querySelectorAll(".preset-btn").forEach(btn => btn.classList.remove("active"));
+      updateDashboard();
+    });
+
+    // Initialize application
+    window.addEventListener("DOMContentLoaded", () => {
+      initSVGNetwork();
+      updateDashboard();
+    });
   </script>
 </body>
 </html>
