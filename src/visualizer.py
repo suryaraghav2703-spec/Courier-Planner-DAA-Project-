@@ -4,8 +4,8 @@ Visualization & Evidence Generation Module for Mini-Courier Planner.
 Generates high-resolution charts and console execution screenshots in `images/`
 covering all 5 Capstone Phases:
 1. `images/phase1_system_architecture.png`
-2. `images/phase2_knapsack_and_prioritization.png`
-3. `images/phase3_delivery_route_map.png`
+2. `images/phase2_knapsack_and_prioritization.png` (with warm red/orange YlOrBr DP heatmap)
+3. `images/phase3_delivery_route_map.png` (with warm red/orange YlOrBr Dijkstra matrix)
 4. `images/phase4_runtime_scalability_charts.png`
 5. `images/phase5_console_execution_screenshot.png`
 """
@@ -102,15 +102,15 @@ def plot_phase2_knapsack_and_prioritization(
 ) -> None:
     """
     Renders Phase 2 visual evidence:
-    - Panel A: Prioritized Parcels (Merge Sort order) colored by DP Selection vs. Deferred.
-    - Panel B: 2D 0/1 Knapsack Dynamic Programming Table Heatmap with Backtracking Path.
+    - Panel A: Prioritized Parcels (Merge Sort order) in original green/slate colors.
+    - Panel B: 2D 0/1 Knapsack Dynamic Programming Table Heatmap in the warm red/amber YlOrBr palette.
     """
     fig, (ax1, ax2) = plt.subplots(1, 2, figsize=(15.5, 6.8), dpi=180, gridspec_kw={"width_ratios": [1.05, 1.35]})
     fig.patch.set_facecolor("#FFFFFF")
 
     selected_ids = {p.parcel_id for p in packing_dp.selected_parcels}
 
-    # --- Panel A: Prioritized Parcels & Box-Filling Status ---
+    # --- Panel A: Prioritized Parcels & Box-Filling Status (Original Normal Colors) ---
     labels = [
         f"#{idx+1:02d} {p.parcel_id} (T{p.priority_tier}, {p.deadline_hrs}h, {p.weight_kg}kg -> {p.destination_id})"
         for idx, p in enumerate(sorted_parcels)
@@ -148,24 +148,24 @@ def plot_phase2_knapsack_and_prioritization(
     deferred_patch = mpatches.Patch(color="#94A3B8", label=f"Deferred to Next Trip ({len(packing_dp.deferred_parcels)} parcels)")
     ax1.legend(handles=[packed_patch, deferred_patch], loc="lower right", fontsize=8.5)
 
-    # --- Panel B: 0/1 Knapsack DP Table Heatmap ---
+    # --- Panel B: 0/1 Knapsack DP Table Heatmap (Kept in Warm Red/Amber YlOrBr Palette) ---
     dp_matrix = np.array(packing_dp.dp_table, dtype=float)
-    im = ax2.imshow(dp_matrix, aspect="auto", cmap="YlGnBu", origin="upper")
+    im = ax2.imshow(dp_matrix, aspect="auto", cmap="YlOrBr", origin="upper")
     cbar = fig.colorbar(im, ax=ax2, fraction=0.042, pad=0.03)
-    cbar.set_label("Cumulative Optimal Value Score dp[i][w]", fontsize=9.5, fontweight="bold")
+    cbar.set_label("Cumulative Optimal Value Score dp[i][w]", fontsize=9.5, fontweight="bold", color="#2A241F")
 
     n_items, max_w_plus_1 = dp_matrix.shape
     row_labels = ["0: Empty"] + [f"{i}: {p.parcel_id} ({p.weight_kg}kg)" for i, p in enumerate(sorted_parcels, 1)]
     ax2.set_yticks(np.arange(n_items))
-    ax2.set_yticklabels(row_labels, fontsize=8, family="monospace")
+    ax2.set_yticklabels(row_labels, fontsize=8, family="monospace", color="#2A241F")
     col_ticks = np.arange(0, max_w_plus_1, 2)
     ax2.set_xticks(col_ticks)
-    ax2.set_xticklabels([f"{w}" for w in col_ticks], fontsize=8)
-    ax2.set_xlabel("Van Capacity w (kg)", fontsize=10, fontweight="bold")
+    ax2.set_xticklabels([f"{w}" for w in col_ticks], fontsize=8, color="#2A241F")
+    ax2.set_xlabel("Van Capacity w (kg)", fontsize=10, fontweight="bold", color="#2A241F")
     ax2.set_title(
         f"Phase 2B: 0/1 Knapsack DP State Table dp[i][w] (15 Parcels × {max_w_plus_1-1} kg)\n"
-        f"Red Trajectory Shows Optimal Backtracking Path from dp[15][30] = {int(dp_matrix[-1, -1])}",
-        fontsize=10.5, fontweight="bold", pad=10
+        f"Crimson Trajectory Shows Optimal Backtracking Path from dp[15][30] = {int(dp_matrix[-1, -1])}",
+        fontsize=10.5, fontweight="bold", pad=10, color="#2A241F"
     )
 
     # Trace backtracking path on heatmap
@@ -174,27 +174,24 @@ def plot_phase2_knapsack_and_prioritization(
     path_i = [n_items - 1]
     for i in range(n_items - 1, 0, -1):
         if dp_matrix[i, rem_w] != dp_matrix[i - 1, rem_w]:
-            # Annotate selected transition cell
-            ax2.scatter([rem_w], [i], color="#EF4444", s=65, zorder=6, edgecolors="white", linewidth=1.2)
+            ax2.scatter([rem_w], [i], color="#B91C1C", s=65, zorder=6, edgecolors="white", linewidth=1.2)
             rem_w -= sorted_parcels[i - 1].weight_kg
         path_w.append(rem_w)
         path_i.append(i - 1)
 
-    ax2.plot(path_w, path_i, color="#EF4444", linewidth=2.2, linestyle="-", label="DP Backtracking Trajectory", zorder=5)
-    # Annotate sampled cell values
+    ax2.plot(path_w, path_i, color="#B91C1C", linewidth=2.2, linestyle="-", label="DP Backtracking Trajectory", zorder=5)
     for i in range(n_items):
         for w in range(0, max_w_plus_1, 5):
             val = int(dp_matrix[i, w])
-            txt_col = "white" if val > dp_matrix.max() * 0.58 else "#0F172A"
+            txt_col = "white" if val > dp_matrix.max() * 0.62 else "#2A241F"
             ax2.text(w, i, f"{val}", ha="center", va="center", fontsize=6.5, color=txt_col)
-        # Also annotate final column W=30
         w_last = max_w_plus_1 - 1
         if w_last % 5 != 0:
             val = int(dp_matrix[i, w_last])
-            txt_col = "white" if val > dp_matrix.max() * 0.58 else "#0F172A"
+            txt_col = "white" if val > dp_matrix.max() * 0.62 else "#2A241F"
             ax2.text(w_last, i, f"{val}", ha="center", va="center", fontsize=6.5, color=txt_col, fontweight="bold")
 
-    ax2.legend(loc="lower left", fontsize=8.5)
+    ax2.legend(loc="lower left", fontsize=8.5, facecolor="#FAF8F5", edgecolor="#D6CBB9")
 
     Path(output_path).parent.mkdir(parents=True, exist_ok=True)
     plt.tight_layout()
@@ -210,16 +207,15 @@ def plot_phase3_delivery_route(
 ) -> None:
     """
     Renders Phase 3 visual evidence:
-    - Panel A: City Road Network with Dijkstra shortest paths and Nearest-Neighbor TSP route.
-    - Panel B: Dijkstra Pairwise Distance Matrix Heatmap & Tour Comparison (Nearest-Neighbor vs 2-Opt).
+    - Panel A: City Road Network with original normal colors.
+    - Panel B: Dijkstra Pairwise Distance Matrix Heatmap kept in the warm red/amber YlOrBr palette.
     """
     fig, (ax1, ax2) = plt.subplots(1, 2, figsize=(15.5, 6.8), dpi=180, gridspec_kw={"width_ratios": [1.25, 1.0]})
     fig.patch.set_facecolor("#FFFFFF")
 
-    # --- Panel A: City Graph & Active Delivery Route ---
+    # --- Panel A: City Graph & Active Delivery Route (Original Normal Colors) ---
     active_stops = set(nn_route.stop_sequence)
 
-    # Draw all road network edges in light gray
     for edge in graph.edges:
         u_node = graph.nodes[edge.source]
         v_node = graph.nodes[edge.target]
@@ -237,7 +233,6 @@ def plot_phase3_delivery_route(
             zorder=2
         )
 
-    # Highlight the physical road segments traversed by the Nearest-Neighbor TSP route
     leg_colors = plt.cm.plasma(np.linspace(0.12, 0.85, len(nn_route.legs)))
     for leg, col in zip(nn_route.legs, leg_colors):
         path_nodes = leg.intermediate_path
@@ -255,7 +250,6 @@ def plot_phase3_delivery_route(
                 zorder=4,
             )
 
-    # Draw nodes
     stop_order_map: Dict[str, int] = {}
     for order_idx, node_id in enumerate(nn_route.stop_sequence[:-1]):
         stop_order_map[node_id] = order_idx
@@ -291,7 +285,7 @@ def plot_phase3_delivery_route(
     ax1.set_ylim(1.5, 19.5)
     ax1.grid(True, linestyle=":", alpha=0.45)
 
-    # --- Panel B: Dijkstra Shortest-Path Distance Matrix Heatmap ---
+    # --- Panel B: Dijkstra Shortest-Path Distance Matrix Heatmap (Kept in Warm Red/Amber YlOrBr) ---
     nodes_ordered = nn_route.stop_sequence[:-1]
     k = len(nodes_ordered)
     mat = np.zeros((k, k))
@@ -299,26 +293,26 @@ def plot_phase3_delivery_route(
         for j, v in enumerate(nodes_ordered):
             mat[i, j] = nn_route.distance_matrix[u][v]
 
-    im2 = ax2.imshow(mat, cmap="PuBu", aspect="auto")
+    im2 = ax2.imshow(mat, cmap="YlOrBr", aspect="auto")
     cbar2 = fig.colorbar(im2, ax=ax2, fraction=0.046, pad=0.04)
-    cbar2.set_label("Shortest Path Distance (km)", fontsize=9, fontweight="bold")
+    cbar2.set_label("Shortest Path Distance (km)", fontsize=9, fontweight="bold", color="#2A241F")
 
     ax2.set_xticks(np.arange(k))
     ax2.set_yticks(np.arange(k))
-    ax2.set_xticklabels(nodes_ordered, fontsize=9, fontweight="bold")
-    ax2.set_yticklabels(nodes_ordered, fontsize=9, fontweight="bold")
+    ax2.set_xticklabels(nodes_ordered, fontsize=9, fontweight="bold", color="#2A241F")
+    ax2.set_yticklabels(nodes_ordered, fontsize=9, fontweight="bold", color="#2A241F")
     ax2.set_title(
         f"Phase 3: All-Pairs Dijkstra Shortest-Path Matrix (km)\n"
         f"NN Tour = {nn_route.total_distance_km:.2f} km vs. 2-Opt Refined = {two_opt_route.total_distance_km:.2f} km",
-        fontsize=10.2, fontweight="bold", pad=10
+        fontsize=10.2, fontweight="bold", pad=10, color="#2A241F"
     )
 
     for i in range(k):
         for j in range(k):
             is_tour_step = (j == (i + 1) % k)
             val = mat[i, j]
-            col = "white" if val > mat.max() * 0.55 else "#0F172A"
-            box = dict(boxstyle="round,pad=0.18", facecolor="none", edgecolor="#EF4444", lw=2.0) if is_tour_step else None
+            col = "white" if val > mat.max() * 0.62 else "#2A241F"
+            box = dict(boxstyle="round,pad=0.18", facecolor="none", edgecolor="#9A3412", lw=2.0) if is_tour_step else None
             ax2.text(j, i, f"{val:.1f}", ha="center", va="center", fontsize=8.5,
                      fontweight="bold" if is_tour_step else "normal", color=col, bbox=box)
 
@@ -336,7 +330,7 @@ def plot_phase4_runtime_charts(
     output_path: str | Path,
 ) -> None:
     """
-    Renders a 4-panel Phase 4 Scalability & Runtime Comparison Dashboard.
+    Renders a 4-panel Phase 4 Scalability & Runtime Comparison Dashboard (Original Normal Colors).
     """
     fig, axes = plt.subplots(2, 2, figsize=(15.5, 10.5), dpi=180)
     fig.patch.set_facecolor("#FFFFFF")
@@ -395,10 +389,10 @@ def plot_phase4_runtime_charts(
     dijk_t = np.array([r["dijkstra_ms"] for r in e2e_records])
     tsp_t = np.array([r["tsp_ms"] for r in e2e_records])
 
-    b1 = ax4.bar(x_e, sort_t, width=0.48, color="#38BDF8", label="Phase 2A: Merge Sort")
-    b2 = ax4.bar(x_e, dp_t, width=0.48, bottom=sort_t, color="#10B981", label="Phase 2B: 0/1 Knapsack DP")
-    b3 = ax4.bar(x_e, dijk_t, width=0.48, bottom=sort_t + dp_t, color="#8B5CF6", label="Phase 3A: Dijkstra Shortest Paths")
-    b4 = ax4.bar(x_e, tsp_t, width=0.48, bottom=sort_t + dp_t + dijk_t, color="#F97316", label="Phase 3B: Nearest-Neighbor TSP")
+    ax4.bar(x_e, sort_t, width=0.48, color="#38BDF8", label="Phase 2A: Merge Sort")
+    ax4.bar(x_e, dp_t, width=0.48, bottom=sort_t, color="#10B981", label="Phase 2B: 0/1 Knapsack DP")
+    ax4.bar(x_e, dijk_t, width=0.48, bottom=sort_t + dp_t, color="#8B5CF6", label="Phase 3A: Dijkstra Shortest Paths")
+    ax4.bar(x_e, tsp_t, width=0.48, bottom=sort_t + dp_t + dijk_t, color="#F97316", label="Phase 3B: Nearest-Neighbor TSP")
 
     totals = sort_t + dp_t + dijk_t + tsp_t
     for idx, tot in enumerate(totals):
@@ -425,7 +419,6 @@ def render_console_screenshot(console_text: str, output_path: str | Path) -> Non
     screenshot PNG in `images/phase5_console_execution_screenshot.png`.
     """
     lines = console_text.strip("\n").splitlines()
-    # Keep up to 78 lines for crisp readability
     if len(lines) > 78:
         lines = lines[:78]
 
@@ -437,7 +430,6 @@ def render_console_screenshot(console_text: str, output_path: str | Path) -> Non
     ax.set_ylim(0, len(lines) + 4)
     ax.axis("off")
 
-    # Terminal window header bar
     header_y = len(lines) + 2.3
     ax.add_patch(mpatches.Rectangle((0, header_y - 0.8), 100, 2.5, color="#1E293B"))
     ax.scatter([2.2, 4.0, 5.8], [header_y + 0.35] * 3, s=95, color=["#EF4444", "#F59E0B", "#10B981"], zorder=5)
